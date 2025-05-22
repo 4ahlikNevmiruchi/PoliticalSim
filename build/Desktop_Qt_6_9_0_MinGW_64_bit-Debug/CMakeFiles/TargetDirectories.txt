@@ -1,0 +1,15 @@
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/PoliticalSim.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/PoliticalSim_autogen_timestamp_deps.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/CMakeFiles/PoliticalSim_autogen.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/CMakeFiles/src_lib.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/CMakeFiles/edit_cache.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/CMakeFiles/rebuild_cache.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/CMakeFiles/src_lib_autogen_timestamp_deps.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/CMakeFiles/src_lib_autogen.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/CMakeFiles/gui_lib.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/CMakeFiles/edit_cache.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/CMakeFiles/rebuild_cache.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/CMakeFiles/gui_lib_autogen_timestamp_deps.dir
+C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/CMakeFiles/gui_lib_autogen.dir

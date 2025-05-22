@@ -1,0 +1,23 @@
+# ninja log v6
+41	104	7696216387207096	CMakeFiles/clean.additional	baedbe210acaa455
+56	916	7696216397016242	src/gui/gui_lib_autogen/mocs_compilation.cpp	633ebf6d0d80f7dd
+104	124	7696216387829734	clean	577b940aee94fbd7
+53	208	7696216767899958	PoliticalSim_autogen/timestamp	5512f937cb6ea809
+56	916	7696216397016242	src/gui/gui_lib_autogen/timestamp	633ebf6d0d80f7dd
+56	916	7696216397016242	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/gui_lib_autogen/timestamp	633ebf6d0d80f7dd
+923	3096	7696216397965525	src/gui/CMakeFiles/gui_lib.dir/mainwindow.cpp.obj	9ed4b69f7fd7cfd0
+56	916	7696216397016242	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/gui/gui_lib_autogen/mocs_compilation.cpp	633ebf6d0d80f7dd
+918	3006	7696216397905468	src/gui/CMakeFiles/gui_lib.dir/gui_lib_autogen/mocs_compilation.cpp.obj	194a4b981a9cf43b
+3097	3208	7696216419698855	src/gui/libgui_lib.a	cabcb55ee59629d8
+3208	3383	7696216422198616	src/src_lib_autogen/timestamp	be4de20fc460ef4c
+3208	3383	7696216422198616	src/src_lib_autogen/mocs_compilation.cpp	be4de20fc460ef4c
+3208	3383	7696216422198616	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/src_lib_autogen/timestamp	be4de20fc460ef4c
+3208	3383	7696216422198616	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/src/src_lib_autogen/mocs_compilation.cpp	be4de20fc460ef4c
+3384	3444	7696216422568877	src/CMakeFiles/src_lib.dir/src_lib_autogen/mocs_compilation.cpp.obj	fb0d850496a75744
+3444	3535	7696216423173422	src/libsrc_lib.a	e123defbfd56bce2
+53	208	7696216767899958	PoliticalSim_autogen/mocs_compilation.cpp	5512f937cb6ea809
+53	208	7696216767899958	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PoliticalSim_autogen/timestamp	5512f937cb6ea809
+53	208	7696216767899958	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PoliticalSim_autogen/mocs_compilation.cpp	5512f937cb6ea809
+3754	3816	7696216426270049	CMakeFiles/PoliticalSim.dir/PoliticalSim_autogen/mocs_compilation.cpp.obj	9dd5066db08c645b
+209	2308	7696216769470546	CMakeFiles/PoliticalSim.dir/main.cpp.obj	218d5aa3b8e71d8a
+2309	2591	7696216790453883	PoliticalSim.exe	3a4af78f91755cc2
