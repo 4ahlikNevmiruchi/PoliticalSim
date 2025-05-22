@@ -18,10 +18,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     partyModel = new PartyModel(this);
     ui->partyTableView->setModel(partyModel);
-
-    // Optional: populate with test data
-    partyModel->addParty({"Unity Party", "Centrist", 35.5});
-    partyModel->addParty({"Green Force", "Environmentalism", 15.2});
 }
 
 MainWindow::~MainWindow()
