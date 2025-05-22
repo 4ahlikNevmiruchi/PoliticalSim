@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     setWindowTitle("PoliticalSim");
 
-    partyModel = new PartyModel(this);
+    partyModel = new PartyModel("main_connection", this);
     ui->partyTableView->setModel(partyModel);
 }
 

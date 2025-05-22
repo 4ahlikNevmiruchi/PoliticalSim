@@ -6,17 +6,26 @@
 #include <QVariant>
 #include <QDebug>
 
-//  Default constructor (delegates to memory-based test DB)
-PartyModel::PartyModel()
-    : PartyModel("", nullptr)
-{}
-
 //  Custom constructor (used in real app or tests with connection name)
 PartyModel::PartyModel(const QString &connectionName, QObject *parent)
-    : QAbstractTableModel(parent)
+    : QAbstractTableModel(parent), m_connectionName(connectionName)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
-    db.setDatabaseName(":memory:"); // Or set file path in GUI context
+    Q_ASSERT(!connectionName.isEmpty());  //Prevent accidental usage
+
+    qDebug() << "[PartyModel] Connection name: " << m_connectionName;
+
+
+    if (QSqlDatabase::contains(m_connectionName)) {
+        {
+            QSqlDatabase db = QSqlDatabase::database(m_connectionName, false);
+            if (db.isValid()) db.close();
+        }
+        QSqlDatabase::removeDatabase(m_connectionName);
+    }
+
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
+    db.setDatabaseName("test_parties.sqlite");
 
     if (!db.open()) {
         qWarning() << "DB open failed:" << db.lastError();
@@ -38,12 +47,9 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
             query.value(2).toDouble()
         });
     }
+    qDebug() << "[PartyModel] Connection name: " << m_connectionName;
+    qDebug() << "[PartyModel] DB path: " << QSqlDatabase::database(m_connectionName).databaseName();
 }
-
-//  Fallback: still allow simple usage with no args
-PartyModel::PartyModel(QObject *parent)
-    : PartyModel("", parent)
-{}
 
 int PartyModel::rowCount(const QModelIndex &) const {
     return m_parties.size();
@@ -83,7 +89,14 @@ void PartyModel::addParty(const Party &party) {
     m_parties.append(party);
     endInsertRows();
 
-    QSqlQuery query;
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName); //critical
+    if (!db.isOpen()) {
+        qWarning() << "Add failed: DB not open";
+        return;
+    }
+
+    QSqlQuery query(QSqlDatabase::database(m_connectionName));
+
     query.prepare("INSERT INTO parties (name, ideology, popularity) "
                   "VALUES (:name, :ideology, :popularity)");
     query.bindValue(":name", party.name);
@@ -93,4 +106,6 @@ void PartyModel::addParty(const Party &party) {
     if (!query.exec()) {
         qWarning() << "Insert failed:" << query.lastError().text();
     }
+    qDebug() << "[PartyModel] Connection name: " << m_connectionName;
+    qDebug() << "[PartyModel] DB path: " << QSqlDatabase::database(m_connectionName).databaseName();
 }
