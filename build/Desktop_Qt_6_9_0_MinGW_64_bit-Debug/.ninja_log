@@ -1,0 +1,18 @@
+# ninja log v6
+23	54	7696191517785638	CMakeFiles/clean.additional	baedbe210acaa455
+54	65	7696191518099735	clean	577b940aee94fbd7
+23	54	7696191691839414	CMakeFiles/clean.additional	baedbe210acaa455
+54	65	7696191692153747	clean	577b940aee94fbd7
+23	220	7696191861564307	PoliticalSim_autogen/timestamp	5512f937cb6ea809
+23	220	7696191861564307	PoliticalSim_autogen/mocs_compilation.cpp	5512f937cb6ea809
+23	220	7696191861564307	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PoliticalSim_autogen/timestamp	5512f937cb6ea809
+23	220	7696191861564307	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PoliticalSim_autogen/mocs_compilation.cpp	5512f937cb6ea809
+224	288	7696191862135174	CMakeFiles/PoliticalSim.dir/PoliticalSim_autogen/mocs_compilation.cpp.obj	277a38d429f7dbc0
+230	1963	7696191862189954	CMakeFiles/PoliticalSim.dir/main.cpp.obj	2d86ac75b86f0f79
+1967	2173	7696191879560668	PoliticalSim.exe	bdd8eaa7554daf7b
+29	169	7696193412015812	PoliticalSim_autogen/timestamp	5512f937cb6ea809
+29	169	7696193412015812	PoliticalSim_autogen/mocs_compilation.cpp	5512f937cb6ea809
+29	169	7696193412015812	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PoliticalSim_autogen/timestamp	5512f937cb6ea809
+29	169	7696193412015812	C:/Users/Viktor/Labs/PoliticalSim/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/PoliticalSim_autogen/mocs_compilation.cpp	5512f937cb6ea809
+171	1900	7696193413438662	CMakeFiles/PoliticalSim.dir/main.cpp.obj	2d86ac75b86f0f79
+1900	2113	7696193430721369	PoliticalSim.exe	bdd8eaa7554daf7b

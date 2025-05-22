@@ -3,6 +3,6 @@
 
 int main(int argc, char *argv[]) {
     QCoreApplication app(argc, argv);
-    qDebug() << "PoliticalSim запущено!";
+    qDebug() << "success";
     return 0;
 }
