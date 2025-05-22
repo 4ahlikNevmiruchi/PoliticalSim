@@ -56,6 +56,7 @@ target_link_libraries(PoliticalSim
 # Unit Test Target
 add_executable(UnitTests
     tests/test_party_model.cpp
+    tests/test_party_db.cpp
     src/models/PartyModel.cpp
 )
 

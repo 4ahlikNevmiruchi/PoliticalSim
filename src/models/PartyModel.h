@@ -15,7 +15,10 @@ class PartyModel : public QAbstractTableModel {
     Q_OBJECT
 
 public:
-    PartyModel(QObject *parent = nullptr);
+    explicit PartyModel(QObject *parent = nullptr);
+    explicit PartyModel(const QString &connectionName, QObject *parent = nullptr);
+
+    PartyModel(); // default constructor
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

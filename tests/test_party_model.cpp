@@ -12,7 +12,7 @@ TEST_CASE("PartyModel basic functionality") {
     char *argv[] = { nullptr };
     QCoreApplication app(argc, argv);  // ✅ ✅ ✅
 
-    PartyModel model;
+    PartyModel model("", nullptr);
     Party p = { "Test Party", "Test Ideology", 55.0 };
     model.addParty(p);
 
