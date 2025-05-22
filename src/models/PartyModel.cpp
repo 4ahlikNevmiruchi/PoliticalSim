@@ -1,7 +1,38 @@
 #include "PartyModel.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+#include <QDebug>
 
 PartyModel::PartyModel(QObject *parent)
-    : QAbstractTableModel(parent) {}
+    : QAbstractTableModel(parent)
+{
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("parties.sqlite");
+
+    if (!db.open()) {
+        qWarning() << "Failed to open DB:" << db.lastError().text();
+    } else {
+        QSqlQuery query;
+        query.exec("CREATE TABLE IF NOT EXISTS parties ("
+                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                   "name TEXT,"
+                   "ideology TEXT,"
+                   "popularity REAL)");
+
+        // Load existing data
+        query.exec("SELECT name, ideology, popularity FROM parties");
+        while (query.next()) {
+            Party p;
+            p.name = query.value(0).toString();
+            p.ideology = query.value(1).toString();
+            p.popularity = query.value(2).toDouble();
+            m_parties.append(p);
+        }
+    }
+
+}
 
 int PartyModel::rowCount(const QModelIndex &) const {
     return m_parties.size();
@@ -40,4 +71,15 @@ void PartyModel::addParty(const Party &party) {
     beginInsertRows(QModelIndex(), m_parties.size(), m_parties.size());
     m_parties.append(party);
     endInsertRows();
+
+    // Save to DB
+    QSqlQuery query;
+    query.prepare("INSERT INTO parties (name, ideology, popularity) "
+                  "VALUES (:name, :ideology, :popularity)");
+    query.bindValue(":name", party.name);
+    query.bindValue(":ideology", party.ideology);
+    query.bindValue(":popularity", party.popularity);
+    if (!query.exec()) {
+        qWarning() << "Insert failed:" << query.lastError().text();
+    }
 }
