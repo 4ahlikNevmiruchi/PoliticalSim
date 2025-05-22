@@ -29,6 +29,9 @@ add_executable(PoliticalSim
     # Models
     src/models/PartyModel.cpp
     src/models/PartyModel.h
+    src/gui/AddPartyDialog.cpp
+    src/gui/AddPartyDialog.h
+    src/gui/AddPartyDialog.ui
 )
 
 # Link Qt
