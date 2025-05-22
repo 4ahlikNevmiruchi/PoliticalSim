@@ -1,5 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include "models/PartyModel.h"
 
 #include <QMainWindow>
 
@@ -19,6 +20,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    PartyModel* partyModel;
 };
 
 #endif // MAINWINDOW_H
