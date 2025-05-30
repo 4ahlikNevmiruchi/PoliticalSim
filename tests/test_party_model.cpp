@@ -13,7 +13,7 @@ TEST_CASE("PartyModel basic functionality") {
     QCoreApplication app(argc, argv);  // ✅ ✅ ✅
 
     PartyModel model("", nullptr);
-    Party p = { "Test Party", "Test Ideology", 55.0 };
+    Party p = { -1, "Test Party", "Test Ideology", 55.0 };
     model.addParty(p);
 
     QModelIndex index = model.index(0, 0);

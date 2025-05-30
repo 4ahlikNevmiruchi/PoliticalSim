@@ -41,13 +41,13 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
 
     ensurePartiesPopulated(db);
 
-
-    query.exec("SELECT name, ideology, popularity FROM parties");
+    query.exec("SELECT id, name, ideology, popularity FROM parties");
     while (query.next()) {
         m_parties.append(Party{
-            query.value(0).toString(),
-            query.value(1).toString(),
-            query.value(2).toDouble()
+            query.value(0).toInt(),         // id
+            query.value(1).toString(),      // name
+            query.value(2).toString(),      // ideology
+            query.value(3).toDouble()       // popularity
         });
     }
     qDebug() << "[PartyModel] Connection name: " << m_connectionName;
@@ -63,15 +63,20 @@ int PartyModel::columnCount(const QModelIndex &) const {
 }
 
 QVariant PartyModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || role != Qt::DisplayRole)
-        return {};
+    if (!index.isValid()) return {};
 
     const Party& party = m_parties.at(index.row());
-    switch (index.column()) {
-    case 0: return party.name;
-    case 1: return party.ideology;
-    case 2: return QString::number(party.popularity, 'f', 2);
+
+    if (role == Qt::DisplayRole) {
+        switch (index.column()) {
+        case 0: return party.name;
+        case 1: return party.ideology;
+        case 2: return QString::number(party.popularity, 'f', 2);
+        }
+    } else if (role == Qt::UserRole) {
+        return party.id;  // Expose party ID for linking
     }
+
     return {};
 }
 

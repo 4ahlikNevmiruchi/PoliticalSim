@@ -25,7 +25,7 @@ TEST_CASE("PartyModel inserts and loads from persistent DB", "[database]") {
 
     SECTION("Insert party and verify persistence") {
         PartyModel model(connName);
-        Party party = { "DB Party", "Techno-Centrism", 42.42 };
+        Party party = { -1, "DB Party", "Techno-Centrism", 42.42 };
         model.addParty(party);
 
         REQUIRE(model.rowCount() == 1);

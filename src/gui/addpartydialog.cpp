@@ -12,6 +12,7 @@ AddPartyDialog::~AddPartyDialog() {
 
 Party AddPartyDialog::getParty() const {
     return Party{
+        -1,
         ui->nameEdit->text(),
         ui->ideologyEdit->text(),
         ui->popularitySpin->value()

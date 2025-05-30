@@ -7,6 +7,7 @@
 #include <QSqlDatabase>
 
 struct Party {
+    int id;
     QString name;
     QString ideology;
     double popularity;
