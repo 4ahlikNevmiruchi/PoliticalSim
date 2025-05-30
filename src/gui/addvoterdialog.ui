@@ -45,7 +45,7 @@
     <string/>
    </property>
    <property name="echoMode">
-    <enum>QLineEdit::EchoMode::Password</enum>
+    <enum>QLineEdit::EchoMode::Normal</enum>
    </property>
    <property name="cursorPosition">
     <number>0</number>
@@ -73,7 +73,7 @@
     <string/>
    </property>
    <property name="echoMode">
-    <enum>QLineEdit::EchoMode::Password</enum>
+    <enum>QLineEdit::EchoMode::Normal</enum>
    </property>
    <property name="cursorPosition">
     <number>0</number>

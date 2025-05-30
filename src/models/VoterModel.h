@@ -18,7 +18,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
     void addVoter(const Voter& voter);
-
+    void reloadData();
     bool ensureVotersPopulated(QSqlDatabase& db);
 
 private:

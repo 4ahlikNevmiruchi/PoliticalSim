@@ -80,10 +80,6 @@ QVariant VoterModel::headerData(int section, Qt::Orientation orientation, int ro
 }
 
 void VoterModel::addVoter(const Voter &voter) {
-    beginInsertRows(QModelIndex(), m_voters.size(), m_voters.size());
-    m_voters.append(voter);
-    endInsertRows();
-
     QSqlDatabase db = QSqlDatabase::database(m_connectionName);
     if (!db.isOpen()) {
         qWarning() << "[VoterModel] Add failed: DB not open";
@@ -95,11 +91,46 @@ void VoterModel::addVoter(const Voter &voter) {
                   "VALUES (:name, :ideology, :party_id)");
     query.bindValue(":name", voter.name);
     query.bindValue(":ideology", voter.ideology);
-    query.bindValue(":party_id", voter.partyId != -1 ? voter.partyId : QVariant(QVariant::Int));
+    if (voter.partyId != -1) {
+        query.bindValue(":party_id", voter.partyId);
+    } else {
+        query.bindValue(":party_id", QVariant(QVariant::Int)); // NULL
+    }
 
     if (!query.exec()) {
         qWarning() << "[VoterModel] Insert failed:" << query.lastError().text();
+        return;
     }
+
+    reloadData();
+}
+
+void VoterModel::reloadData() {
+    beginResetModel();
+    m_voters.clear();
+
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    if (!db.isOpen()) {
+        qWarning() << "[VoterModel] reloadData failed: DB not open";
+        endResetModel();
+        return;
+    }
+
+    QSqlQuery query(db);
+    query.exec("SELECT voters.name, voters.ideology, voters.party_id, parties.name "
+               "FROM voters LEFT JOIN parties ON voters.party_id = parties.id");
+
+    while (query.next()) {
+        Voter v;
+        v.name = query.value(0).toString();
+        v.ideology = query.value(1).toString();
+        v.partyId = query.value(2).isNull() ? -1 : query.value(2).toInt();
+        v.partyName = query.value(3).toString();
+        m_voters.append(v);
+    }
+
+    endResetModel();
+    qDebug() << "[VoterModel] reloadData completed. Rows:" << m_voters.size();
 }
 
 bool VoterModel::ensureVotersPopulated(QSqlDatabase& db) {
