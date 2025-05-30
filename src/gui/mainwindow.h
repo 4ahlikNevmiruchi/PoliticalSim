@@ -10,6 +10,12 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+/**
+ * @brief Main application window
+ * 
+ * @details Displays party data in a table view and handles user interactions
+ * such as adding new parties.
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

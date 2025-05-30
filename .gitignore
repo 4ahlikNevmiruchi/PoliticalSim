@@ -28,3 +28,21 @@ CMakeCache.txt
 # DB
 *.db
 *.sqlite
+docs/html/clipboard.js
+docs/html/cookie.js
+docs/html/doxygen_crawl.html
+docs/html/doxygen.css
+docs/html/doxygen.svg
+docs/html/dynsections.js
+docs/html/index.html
+docs/html/jquery.js
+docs/html/menu.js
+docs/html/menudata.js
+docs/html/navtree.css
+docs/html/navtree.js
+docs/html/navtreedata.js
+docs/html/navtreeindex0.js
+docs/html/tabs.css
+docs/html/search/search.css
+docs/html/search/search.js
+docs/html/search/searchdata.js

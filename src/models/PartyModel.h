@@ -10,7 +10,13 @@ struct Party {
     QString ideology;
     double popularity;
 };
-
+/**
+ * @brief Manages a table model of political parties, using an SQLite database.
+ * 
+ * @details PartyModel handles adding, storing, and retrieving party information
+ * including name, ideology, and popularity. It interacts with an SQLite backend
+ * for persistence.
+ */
 class PartyModel : public QAbstractTableModel {
     Q_OBJECT
 
@@ -24,6 +30,11 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+    /**
+     * @brief Adds a new party to the model and database.
+     * 
+     * @param party The Party struct containing name, ideology, and popularity.
+     */
     void addParty(const Party& party);
 
 private:
