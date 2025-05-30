@@ -25,7 +25,7 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
 
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-    db.setDatabaseName("test_parties.sqlite");
+    db.setDatabaseName("politicalsim.sqlite");
 
     if (!db.open()) {
         qWarning() << "DB open failed:" << db.lastError();

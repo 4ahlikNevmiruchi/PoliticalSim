@@ -7,6 +7,7 @@ struct Voter {
     QString name;
     QString ideology;
     int partyId;
+    QString partyName;
 };
 
 #endif // VOTER_H

@@ -34,12 +34,16 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent)
 
     ensureVotersPopulated(db);
 
-    query.exec("SELECT name, ideology, party_id FROM voters");
+    query.exec("SELECT voters.name, voters.ideology, voters.party_id, parties.name "
+               "FROM voters "
+               "LEFT JOIN parties ON voters.party_id = parties.id");
+
     while (query.next()) {
         Voter v;
         v.name = query.value(0).toString();
         v.ideology = query.value(1).toString();
         v.partyId = query.value(2).isNull() ? -1 : query.value(2).toInt();
+        v.partyName = query.value(3).toString();
         m_voters.append(v);
     }
 }
@@ -59,7 +63,7 @@ QVariant VoterModel::data(const QModelIndex &index, int role) const {
     switch (index.column()) {
     case 0: return voter.name;
     case 1: return voter.ideology;
-    case 2: return voter.partyId == -1 ? "N/A" : QString::number(voter.partyId);
+    case 2: return voter.partyName.isEmpty() ? "N/A" : voter.partyName; // ✅ Party name display
     }
     return {};
 }
@@ -70,7 +74,7 @@ QVariant VoterModel::headerData(int section, Qt::Orientation orientation, int ro
     switch (section) {
     case 0: return "Name";
     case 1: return "Ideology";
-    case 2: return "Preferred Party ID";
+    case 2: return "Preferred Party";
     }
     return {};
 }
@@ -109,12 +113,12 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db) {
         insert.prepare("INSERT INTO voters (name, ideology, party_id) VALUES (?, ?, ?)");
         insert.addBindValue("John Doe");
         insert.addBindValue("Centrist");
-        insert.addBindValue(1);  // Matches seeded Unity Party ID
+        insert.addBindValue(1);
         insert.exec();
 
         insert.addBindValue("Jane Smith");
         insert.addBindValue("Environmentalism");
-        insert.addBindValue(2);  // Matches seeded Green Force ID
+        insert.addBindValue(2);
         insert.exec();
 
         qDebug() << "[VoterModel] Seeded default voters.";
