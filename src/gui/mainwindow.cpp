@@ -23,14 +23,39 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
+    connect(ui->deletePartyButton, &QPushButton::clicked, this, [=]() {
+        QModelIndex selected = ui->partyTableView->currentIndex();
+        if (!selected.isValid()) return;
+
+        int row = selected.row();
+        int partyId = partyModel->getPartyIdAt(row);
+        partyModel->deletePartyById(partyId);
+        partyModel->reloadData();
+        voterModel->reloadData();
+    });
+
+    connect(ui->deleteVoterButton, &QPushButton::clicked, this, [=]() {
+        QModelIndex index = ui->voterTableView->currentIndex();
+        if (!index.isValid()) return;
+
+        int row = index.row();
+        int voterId = voterModel->getVoterIdAt(row);
+        if (voterId != -1) {
+            voterModel->deleteVoterById(voterId);
+        }
+        partyModel->reloadData();
+        voterModel->reloadData();
+    });
+
     setWindowTitle("PoliticalSim");
 
     partyModel = new PartyModel("main_connection", this);
     ui->partyTableView->setModel(partyModel);
+    partyModel->reloadData();
 
     voterModel = new VoterModel("main_connection", this);
     ui->voterTableView->setModel(voterModel);
-
+    voterModel->reloadData();
 }
 
 MainWindow::~MainWindow()

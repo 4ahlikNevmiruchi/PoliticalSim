@@ -4,9 +4,10 @@
 #include <QString>
 
 struct Voter {
+    int id = -1;
     QString name;
     QString ideology;
-    int partyId;
+    int partyId = -1;
     QString partyName;
 };
 

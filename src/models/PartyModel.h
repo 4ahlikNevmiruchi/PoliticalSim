@@ -40,7 +40,9 @@ public:
     void addParty(const Party& party);
 
     bool ensurePartiesPopulated(QSqlDatabase& db);
-
+    int getPartyIdAt(int row) const;
+    void deletePartyById(int partyId);
+    void reloadData();
 
 private:
     QVector<Party> m_parties;

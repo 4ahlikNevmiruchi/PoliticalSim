@@ -20,6 +20,8 @@ public:
     void addVoter(const Voter& voter);
     void reloadData();
     bool ensureVotersPopulated(QSqlDatabase& db);
+    int getVoterIdAt(int row) const;
+    void deleteVoterById(int voterId);
 
 private:
     QString m_connectionName;

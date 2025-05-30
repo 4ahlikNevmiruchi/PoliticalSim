@@ -93,18 +93,13 @@ QVariant PartyModel::headerData(int section, Qt::Orientation orientation, int ro
 }
 
 void PartyModel::addParty(const Party &party) {
-    beginInsertRows(QModelIndex(), m_parties.size(), m_parties.size());
-    m_parties.append(party);
-    endInsertRows();
-
-    QSqlDatabase db = QSqlDatabase::database(m_connectionName); //critical
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
     if (!db.isOpen()) {
-        qWarning() << "Add failed: DB not open";
+        qWarning() << "[PartyModel] addParty: DB not open";
         return;
     }
 
-    QSqlQuery query(QSqlDatabase::database(m_connectionName));
-
+    QSqlQuery query(db);
     query.prepare("INSERT INTO parties (name, ideology, popularity) "
                   "VALUES (:name, :ideology, :popularity)");
     query.bindValue(":name", party.name);
@@ -112,10 +107,42 @@ void PartyModel::addParty(const Party &party) {
     query.bindValue(":popularity", party.popularity);
 
     if (!query.exec()) {
-        qWarning() << "Insert failed:" << query.lastError().text();
+        qWarning() << "[PartyModel] Insert failed:" << query.lastError().text();
+        return;
     }
-    qDebug() << "[PartyModel] Connection name: " << m_connectionName;
-    qDebug() << "[PartyModel] DB path: " << QSqlDatabase::database(m_connectionName).databaseName();
+
+    // Reload full data from DB
+    reloadData();
+}
+
+void PartyModel::reloadData() {
+    beginResetModel();
+    m_parties.clear();
+
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    if (!db.isOpen()) {
+        qWarning() << "[PartyModel] reloadData: DB not open";
+        endResetModel();
+        return;
+    }
+
+    QSqlQuery query(db);
+    if (!query.exec("SELECT id, name, ideology, popularity FROM parties")) {
+        qWarning() << "[PartyModel] reloadData failed:" << query.lastError().text();
+        endResetModel();
+        return;
+    }
+
+    while (query.next()) {
+        m_parties.append(Party{
+            query.value(0).toInt(),                     // id
+            query.value(1).toString(),                  // name
+            query.value(2).toString(),                  // ideology
+            query.value(3).toDouble()                   // popularity
+        });
+    }
+
+    endResetModel();
 }
 
 bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
@@ -132,4 +159,20 @@ bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
         return true;
     }
     return false;
+}
+
+int PartyModel::getPartyIdAt(int row) const {
+    if (row < 0 || row >= m_parties.size()) return -1;
+    return m_parties[row].id;
+}
+
+void PartyModel::deletePartyById(int partyId) {
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    QSqlQuery query(db);
+    query.prepare("DELETE FROM parties WHERE id = :id");
+    query.bindValue(":id", partyId);
+    if (!query.exec()) {
+        qWarning() << "[PartyModel] Delete failed:" << query.lastError().text();
+    }
+    reloadData();
 }

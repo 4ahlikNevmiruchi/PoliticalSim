@@ -34,17 +34,17 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent)
 
     ensureVotersPopulated(db);
 
-    query.exec("SELECT voters.name, voters.ideology, voters.party_id, parties.name "
+    query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
                "FROM voters "
                "LEFT JOIN parties ON voters.party_id = parties.id");
 
     while (query.next()) {
         Voter v;
-        v.name = query.value(0).toString();
-        v.ideology = query.value(1).toString();
-        v.partyId = query.value(2).isNull() ? -1 : query.value(2).toInt();
-        v.partyName = query.value(3).toString();
-        m_voters.append(v);
+        v.id = query.value(0).toInt();
+        v.name = query.value(1).toString();
+        v.ideology = query.value(2).toString();
+        v.partyId = query.value(3).toInt();
+        v.partyName = query.value(4).toString();
     }
 }
 
@@ -109,23 +109,22 @@ void VoterModel::reloadData() {
     beginResetModel();
     m_voters.clear();
 
-    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
-    if (!db.isOpen()) {
-        qWarning() << "[VoterModel] reloadData failed: DB not open";
+    QSqlQuery query(QSqlDatabase::database(m_connectionName));
+    if (!query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
+                    "FROM voters "
+                    "LEFT JOIN parties ON voters.party_id = parties.id")) {
+        qWarning() << "[VoterModel] reloadData failed:" << query.lastError().text();
         endResetModel();
         return;
     }
 
-    QSqlQuery query(db);
-    query.exec("SELECT voters.name, voters.ideology, voters.party_id, parties.name "
-               "FROM voters LEFT JOIN parties ON voters.party_id = parties.id");
-
     while (query.next()) {
         Voter v;
-        v.name = query.value(0).toString();
-        v.ideology = query.value(1).toString();
-        v.partyId = query.value(2).isNull() ? -1 : query.value(2).toInt();
-        v.partyName = query.value(3).toString();
+        v.id = query.value(0).toInt();
+        v.name = query.value(1).toString();
+        v.ideology = query.value(2).toString();
+        v.partyId = query.value(3).isNull() ? -1 : query.value(3).toInt();
+        v.partyName = query.value(4).toString();
         m_voters.append(v);
     }
 
@@ -156,4 +155,21 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db) {
         return true;
     }
     return false;
+}
+
+int VoterModel::getVoterIdAt(int row) const {
+    if (row >= 0 && row < m_voters.size())
+        return m_voters[row].id;
+    return -1;
+}
+
+void VoterModel::deleteVoterById(int voterId) {
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    QSqlQuery query(db);
+    query.prepare("DELETE FROM voters WHERE id = :id");
+    query.bindValue(":id", voterId);
+    if (!query.exec()) {
+        qWarning() << "[VoterModel] Delete failed:" << query.lastError().text();
+    }
+    reloadData();
 }

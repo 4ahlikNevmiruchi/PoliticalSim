@@ -60,6 +60,32 @@
      <string>Add Voter</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="deletePartyButton">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>290</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete Party</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="deleteVoterButton">
+    <property name="geometry">
+     <rect>
+      <x>1260</x>
+      <y>290</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete Voter</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
