@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1447</width>
-    <height>783</height>
+    <height>474</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,6 +47,19 @@
      </rect>
     </property>
    </widget>
+   <widget class="QPushButton" name="addVoterButton">
+    <property name="geometry">
+     <rect>
+      <x>970</x>
+      <y>290</y>
+      <width>80</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add Voter</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -57,6 +70,12 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuPoliticalSim">
+    <property name="title">
+     <string>PoliticalSim</string>
+    </property>
+   </widget>
+   <addaction name="menuPoliticalSim"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

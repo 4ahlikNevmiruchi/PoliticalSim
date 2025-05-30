@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "AddPartyDialog.h"
+#include "addpartydialog.h"
+#include "addvoterdialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -11,6 +12,14 @@ MainWindow::MainWindow(QWidget *parent)
         if (dialog.exec() == QDialog::Accepted) {
             Party newParty = dialog.getParty();
             partyModel->addParty(newParty);
+        }
+    });
+
+    connect(ui->addVoterButton, &QPushButton::clicked, this, [=]() {
+        AddVoterDialog dialog(this, partyModel);
+        if (dialog.exec() == QDialog::Accepted) {
+            Voter newVoter = dialog.getVoter();
+            voterModel->addVoter(newVoter);
         }
     });
 

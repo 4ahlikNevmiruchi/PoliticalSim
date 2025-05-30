@@ -1,0 +1,29 @@
+#include "AddVoterDialog.h"
+#include "ui_addvoterdialog.h"
+
+AddVoterDialog::AddVoterDialog(QWidget *parent, PartyModel *partyModel)
+    : QDialog(parent), ui(new Ui::AddVoterDialog)
+{
+    ui->setupUi(this);
+
+    if (partyModel) {
+        for (int row = 0; row < partyModel->rowCount(); ++row) {
+            QModelIndex index = partyModel->index(row, 0);  // Name column
+            QString partyName = partyModel->data(index, Qt::DisplayRole).toString();
+            int partyId = partyModel->data(index, Qt::UserRole).toInt();
+            ui->partyComboBox->addItem(partyName, partyId);
+        }
+    }
+}
+
+AddVoterDialog::~AddVoterDialog() {
+    delete ui;
+}
+
+Voter AddVoterDialog::getVoter() const {
+    Voter v;
+    v.name = ui->nameEdit->text();
+    v.ideology = ui->ideologyEdit->text();
+    v.partyId = ui->partyComboBox->currentData().toInt();
+    return v;
+}
