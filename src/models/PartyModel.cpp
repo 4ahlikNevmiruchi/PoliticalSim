@@ -39,6 +39,9 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
                "ideology TEXT, "
                "popularity REAL)");
 
+    ensurePartiesPopulated(db);
+
+
     query.exec("SELECT name, ideology, popularity FROM parties");
     while (query.next()) {
         m_parties.append(Party{
@@ -108,4 +111,20 @@ void PartyModel::addParty(const Party &party) {
     }
     qDebug() << "[PartyModel] Connection name: " << m_connectionName;
     qDebug() << "[PartyModel] DB path: " << QSqlDatabase::database(m_connectionName).databaseName();
+}
+
+bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
+    QSqlQuery countQuery(db);
+    if (!countQuery.exec("SELECT COUNT(*) FROM parties")) {
+        qWarning() << "[PartyModel] Count query failed:" << countQuery.lastError().text();
+        return false;
+    }
+    if (countQuery.next() && countQuery.value(0).toInt() == 0) {
+        QSqlQuery insert(db);
+        insert.exec("INSERT INTO parties (name, ideology, popularity) VALUES ('Unity Party', 'Centrist', 50.0)");
+        insert.exec("INSERT INTO parties (name, ideology, popularity) VALUES ('Green Force', 'Environmentalism', 30.0)");
+        qDebug() << "[PartyModel] Seeded default parties.";
+        return true;
+    }
+    return false;
 }

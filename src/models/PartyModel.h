@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QString>
 #include <QVector>
+#include <QSqlDatabase>
 
 struct Party {
     QString name;
@@ -36,6 +37,9 @@ public:
      * @param party The Party struct containing name, ideology, and popularity.
      */
     void addParty(const Party& party);
+
+    bool ensurePartiesPopulated(QSqlDatabase& db);
+
 
 private:
     QVector<Party> m_parties;

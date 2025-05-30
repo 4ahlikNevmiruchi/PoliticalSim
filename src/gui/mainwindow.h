@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include "models/PartyModel.h"
+#include "models/VoterModel.h"
 
 #include <QMainWindow>
 
@@ -26,7 +27,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+
     PartyModel* partyModel;
+    VoterModel *voterModel;
 };
 
 #endif // MAINWINDOW_H

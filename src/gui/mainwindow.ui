@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1447</width>
+    <height>783</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,13 +37,23 @@
      <string>Add Party</string>
     </property>
    </widget>
+   <widget class="QTableView" name="voterTableView">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>60</y>
+      <width>581</width>
+      <height>192</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1447</width>
      <height>21</height>
     </rect>
    </property>

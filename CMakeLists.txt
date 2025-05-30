@@ -36,6 +36,10 @@ add_executable(PoliticalSim
 
     src/models/PartyModel.cpp
     src/models/PartyModel.h
+    src/models/Voter.h
+
+    src/models/VoterModel.h
+    src/models/VoterModel.cpp
 )
 
 # Includes for GUI

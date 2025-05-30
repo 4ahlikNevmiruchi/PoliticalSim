@@ -18,6 +18,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     partyModel = new PartyModel("main_connection", this);
     ui->partyTableView->setModel(partyModel);
+
+    voterModel = new VoterModel("test_connection", this);
+    ui->voterTableView->setModel(voterModel);
+
 }
 
 MainWindow::~MainWindow()
