@@ -9,6 +9,11 @@
 class VoterModel : public QAbstractTableModel {
     Q_OBJECT
 
+signals:
+    void voterAdded();
+    void voterUpdated();
+    void voterDeleted();
+
 public:
     explicit VoterModel(const QString &connectionName, QObject *parent = nullptr);
 

@@ -22,6 +22,11 @@ struct Party {
 class PartyModel : public QAbstractTableModel {
     Q_OBJECT
 
+signals:
+    void partyAdded();
+    void partyUpdated();
+    void partyDeleted();
+
 public:
     QString m_connectionName;
 
@@ -51,5 +56,6 @@ public:
 private:
     QVector<Party> m_parties;
 };
+
 
 #endif // PARTYMODEL_H

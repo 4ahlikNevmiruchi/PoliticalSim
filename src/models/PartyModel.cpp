@@ -111,8 +111,8 @@ void PartyModel::addParty(const Party &party) {
         return;
     }
 
-    // Reload full data from DB
-    reloadData();
+    emit partyAdded();
+    //reloadData();
 }
 
 void PartyModel::reloadData() {
@@ -174,7 +174,9 @@ void PartyModel::deletePartyById(int partyId) {
     if (!query.exec()) {
         qWarning() << "[PartyModel] Delete failed:" << query.lastError().text();
     }
-    reloadData();
+
+    emit partyDeleted();
+    //reloadData();
 }
 
 void PartyModel::updateParty(int id, const Party &updatedParty) {
@@ -195,7 +197,8 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
         qWarning() << "[PartyModel] Update failed:" << query.lastError().text();
     }
 
-    reloadData();
+    emit partyUpdated();
+    //reloadData();
 }
 
 Party PartyModel::getPartyAt(int row) const {

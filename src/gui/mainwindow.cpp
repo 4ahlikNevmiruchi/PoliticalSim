@@ -5,7 +5,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-    ui->setupUi(this);
+        ui->setupUi(this);
 
     connect(ui->addPartyButton, &QPushButton::clicked, this, [=]() {
         AddPartyDialog dialog(this);
@@ -30,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
         int row = selected.row();
         int partyId = partyModel->getPartyIdAt(row);
         partyModel->deletePartyById(partyId);
-        partyModel->reloadData();
-        voterModel->reloadData();
+        //partyModel->reloadData();
+        //voterModel->reloadData();
     });
 
     connect(ui->deleteVoterButton, &QPushButton::clicked, this, [=]() {
@@ -43,8 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
         if (voterId != -1) {
             voterModel->deleteVoterById(voterId);
         }
-        partyModel->reloadData();
-        voterModel->reloadData();
+        //partyModel->reloadData();
+        //voterModel->reloadData();
     });
 
     connect(ui->editPartyButton, &QPushButton::clicked, this, [=]() {
@@ -62,8 +62,8 @@ MainWindow::MainWindow(QWidget *parent)
             Party updated = dialog.getParty();
             partyModel->updateParty(id, updated);
 
-            partyModel->reloadData();
-            voterModel->reloadData();
+            //partyModel->reloadData();
+            //voterModel->reloadData();
         }
     });
 
@@ -88,11 +88,24 @@ MainWindow::MainWindow(QWidget *parent)
 
     partyModel = new PartyModel("main_connection", this);
     ui->partyTableView->setModel(partyModel);
+
     partyModel->reloadData();
 
     voterModel = new VoterModel("main_connection", this);
     ui->voterTableView->setModel(voterModel);
+
     voterModel->reloadData();
+
+    connect(partyModel, &PartyModel::partyAdded, partyModel, &PartyModel::reloadData);
+    connect(partyModel, &PartyModel::partyUpdated, partyModel, &PartyModel::reloadData);
+    connect(partyModel, &PartyModel::partyDeleted, partyModel, &PartyModel::reloadData);
+
+    connect(partyModel, &PartyModel::partyUpdated, voterModel, &VoterModel::reloadData);
+    connect(partyModel, &PartyModel::partyDeleted, voterModel, &VoterModel::reloadData);
+
+    connect(voterModel, &VoterModel::voterAdded, voterModel, &VoterModel::reloadData);
+    connect(voterModel, &VoterModel::voterUpdated, voterModel, &VoterModel::reloadData);
+    connect(voterModel, &VoterModel::voterDeleted, voterModel, &VoterModel::reloadData);
 }
 
 MainWindow::~MainWindow()

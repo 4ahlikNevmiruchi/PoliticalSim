@@ -102,7 +102,8 @@ void VoterModel::addVoter(const Voter &voter) {
         return;
     }
 
-    reloadData();
+    emit voterAdded();
+    //reloadData();
 }
 
 void VoterModel::reloadData() {
@@ -171,7 +172,9 @@ void VoterModel::deleteVoterById(int voterId) {
     if (!query.exec()) {
         qWarning() << "[VoterModel] Delete failed:" << query.lastError().text();
     }
-    reloadData();
+
+    emit voterDeleted();
+    //reloadData();
 }
 
 void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
@@ -192,7 +195,8 @@ void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
         qWarning() << "[VoterModel] Update failed:" << query.lastError().text();
     }
 
-    reloadData();
+    emit voterUpdated();
+    //reloadData();
 }
 
 Voter VoterModel::getVoterAt(int row) const {
