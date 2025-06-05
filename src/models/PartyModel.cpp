@@ -151,13 +151,26 @@ bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
         qWarning() << "[PartyModel] Count query failed:" << countQuery.lastError().text();
         return false;
     }
+
     if (countQuery.next() && countQuery.value(0).toInt() == 0) {
         QSqlQuery insert(db);
-        insert.exec("INSERT INTO parties (name, ideology, popularity) VALUES ('Unity Party', 'Centrist', 50.0)");
-        insert.exec("INSERT INTO parties (name, ideology, popularity) VALUES ('Green Force', 'Environmentalism', 30.0)");
+        QStringList insertStmts = {
+            "INSERT INTO parties (name, ideology, popularity) VALUES ('Unity Party', 'Centrist', 50.0)",
+            "INSERT INTO parties (name, ideology, popularity) VALUES ('Green Force', 'Environmentalism', 30.0)",
+            "INSERT INTO parties (name, ideology, popularity) VALUES ('Workers Union', 'Socialism', 40.0)",
+            "INSERT INTO parties (name, ideology, popularity) VALUES ('Liberty League', 'Liberalism', 35.5)",
+            "INSERT INTO parties (name, ideology, popularity) VALUES ('Tradition Front', 'Conservatism', 38.0)"
+        };
+
+        for (const QString& stmt : insertStmts) {
+            if (!insert.exec(stmt))
+                qWarning() << "[PartyModel] Insert failed:" << insert.lastError().text();
+        }
+
         qDebug() << "[PartyModel] Seeded default parties.";
         return true;
     }
+
     return false;
 }
 

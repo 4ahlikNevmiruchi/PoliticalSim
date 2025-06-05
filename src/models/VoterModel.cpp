@@ -1,3 +1,4 @@
+#include "Voter.h"
 #include "VoterModel.h"
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -139,22 +140,41 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db) {
         qWarning() << "[VoterModel] Count query failed:" << countQuery.lastError().text();
         return false;
     }
+
     if (countQuery.next() && countQuery.value(0).toInt() == 0) {
         QSqlQuery insert(db);
         insert.prepare("INSERT INTO voters (name, ideology, party_id) VALUES (?, ?, ?)");
-        insert.addBindValue("John Doe");
-        insert.addBindValue("Centrist");
-        insert.addBindValue(1);
-        insert.exec();
 
-        insert.addBindValue("Jane Smith");
-        insert.addBindValue("Environmentalism");
-        insert.addBindValue(2);
-        insert.exec();
+        const QList<Voter> defaultVoters = {
+            { "John Doe", "Centrist", 1 },
+            { "Lisa Feynman", "Rationalist", 2 },
+            { "Clark Kent", "Moderate", 1 },
+            { "Sarah Connor", "Reformist", 3 },
+            { "Rick Sanchez", "Anarcho-Scientist", 4 },
+            { "Dana Scully", "Empiricist", 2 },
+            { "Mario Rossi", "Populist", 1 },
+            { "Leia Organa", "Progressive", 3 },
+            { "Walter White", "Pragmatist", 4 },
+            { "Bruce Wayne", "Individualist", 2 },
+            { "Tony Stark", "Techno-Libertarian", 3 },
+            { "Ada Lovelace", "Innovationist", 1 },
+            { "Sheldon Cooper", "Logic-Driven", 2 },
+            { "Captain Nemo", "Isolationist", 5 },
+            { "Harriet Tubman", "Freedom Fighter", 4 }
+        };
+
+        for (const Voter& v : defaultVoters) {
+            insert.addBindValue(v.name);
+            insert.addBindValue(v.ideology);
+            insert.addBindValue(v.partyId);
+            if (!insert.exec())
+                qWarning() << "[VoterModel] Insert failed:" << insert.lastError().text();
+        }
 
         qDebug() << "[VoterModel] Seeded default voters.";
         return true;
     }
+
     return false;
 }
 

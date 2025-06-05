@@ -2,6 +2,8 @@
 #include "ui_MainWindow.h"
 #include "addpartydialog.h"
 #include "addvoterdialog.h"
+#include <QSqlQuery>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -82,6 +84,34 @@ MainWindow::MainWindow(QWidget *parent)
             Voter updated = dialog.getVoter();
             voterModel->updateVoter(id, updated);
         }
+    });
+
+    connect(ui->resetButton, &QPushButton::clicked, this, [=]() {
+        QMessageBox::StandardButton reply = QMessageBox::warning(
+            this,
+            "Confirm Reset",
+            "Are you sure you want to overwrite all existing data with the default values?\nThis cannot be undone.",
+            QMessageBox::Yes | QMessageBox::No
+            );
+
+        if (reply != QMessageBox::Yes)
+            return;
+
+        QSqlDatabase db = QSqlDatabase::database("main_connection");
+        if (!db.isOpen()) {
+            qWarning() << "Reset failed: DB not open";
+            return;
+        }
+
+        QSqlQuery clearQuery(db);
+        clearQuery.exec("DELETE FROM voters");
+        clearQuery.exec("DELETE FROM parties");
+
+        partyModel->ensurePartiesPopulated(db);
+        voterModel->ensureVotersPopulated(db);
+
+        partyModel->reloadData();
+        voterModel->reloadData();
     });
 
     setWindowTitle("PoliticalSim");
