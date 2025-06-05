@@ -176,3 +176,29 @@ void PartyModel::deletePartyById(int partyId) {
     }
     reloadData();
 }
+
+void PartyModel::updateParty(int id, const Party &updatedParty) {
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    if (!db.isOpen()) {
+        qWarning() << "[PartyModel] Update failed: DB not open";
+        return;
+    }
+
+    QSqlQuery query(db);
+    query.prepare("UPDATE parties SET name = :name, ideology = :ideology, popularity = :popularity WHERE id = :id");
+    query.bindValue(":name", updatedParty.name);
+    query.bindValue(":ideology", updatedParty.ideology);
+    query.bindValue(":popularity", updatedParty.popularity);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qWarning() << "[PartyModel] Update failed:" << query.lastError().text();
+    }
+
+    reloadData();
+}
+
+Party PartyModel::getPartyAt(int row) const {
+    if (row < 0 || row >= m_parties.size()) return {};
+    return m_parties[row];
+}

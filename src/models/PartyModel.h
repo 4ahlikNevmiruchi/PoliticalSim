@@ -7,7 +7,7 @@
 #include <QSqlDatabase>
 
 struct Party {
-    int id;
+    int id = -1;
     QString name;
     QString ideology;
     double popularity;
@@ -43,6 +43,10 @@ public:
     int getPartyIdAt(int row) const;
     void deletePartyById(int partyId);
     void reloadData();
+    void updateParty(int id, const Party &updatedParty);
+
+    Party getPartyAt(int row) const;
+
 
 private:
     QVector<Party> m_parties;

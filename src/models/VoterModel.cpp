@@ -173,3 +173,29 @@ void VoterModel::deleteVoterById(int voterId) {
     }
     reloadData();
 }
+
+void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    if (!db.isOpen()) {
+        qWarning() << "[VoterModel] Update failed: DB not open";
+        return;
+    }
+
+    QSqlQuery query(db);
+    query.prepare("UPDATE voters SET name = :name, ideology = :ideology, party_id = :party_id WHERE id = :id");
+    query.bindValue(":name", updatedVoter.name);
+    query.bindValue(":ideology", updatedVoter.ideology);
+    query.bindValue(":party_id", updatedVoter.partyId);
+    query.bindValue(":id", id);
+
+    if (!query.exec()) {
+        qWarning() << "[VoterModel] Update failed:" << query.lastError().text();
+    }
+
+    reloadData();
+}
+
+Voter VoterModel::getVoterAt(int row) const {
+    if (row < 0 || row >= m_voters.size()) return {};
+    return m_voters[row];
+}

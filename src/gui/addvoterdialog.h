@@ -17,9 +17,14 @@ public:
     ~AddVoterDialog();
 
     Voter getVoter() const;
+    void setVoter(const Voter &voter);
+
+    void setPartyOptions(const QVector<Party>& parties);
+
 
 private:
     Ui::AddVoterDialog *ui;
+    QVector<Party> partyList;
 };
 
 #endif // ADDVOTERDIALOG_H

@@ -16,9 +16,12 @@ public:
     ~AddPartyDialog();
 
     Party getParty() const;
+    void setParty(const Party &party);
+    int getPartyId() const;
 
 private:
     Ui::AddPartyDialog *ui;
+    int m_partyId = -1;
 };
 
 #endif // ADDPARTYDIALOG_H

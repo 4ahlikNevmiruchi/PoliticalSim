@@ -22,6 +22,10 @@ public:
     bool ensureVotersPopulated(QSqlDatabase& db);
     int getVoterIdAt(int row) const;
     void deleteVoterById(int voterId);
+    void updateVoter(int id, const Voter &updatedVoter);
+
+    Voter getVoterAt(int row) const;
+
 
 private:
     QString m_connectionName;

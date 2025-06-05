@@ -47,6 +47,40 @@ MainWindow::MainWindow(QWidget *parent)
         voterModel->reloadData();
     });
 
+    connect(ui->editPartyButton, &QPushButton::clicked, this, [=]() {
+        QModelIndex index = ui->partyTableView->currentIndex();
+        int row = index.row();
+        if (row < 0) return;
+
+        int id = partyModel->getPartyIdAt(row);
+        Party oldParty = partyModel->getPartyAt(row);
+
+        AddPartyDialog dialog(this);
+        dialog.setParty(oldParty);
+
+        if (dialog.exec() == QDialog::Accepted) {
+            Party updated = dialog.getParty();
+            partyModel->updateParty(id, updated);
+        }
+    });
+
+    connect(ui->editVoterButton, &QPushButton::clicked, this, [=]() {
+        QModelIndex index = ui->voterTableView->currentIndex();
+        int row = index.row();
+        if (row < 0) return;
+
+        int id = voterModel->getVoterIdAt(row);
+        Voter oldVoter = voterModel->getVoterAt(row);
+
+        AddVoterDialog dialog(this);
+        dialog.setVoter(oldVoter);
+
+        if (dialog.exec() == QDialog::Accepted) {
+            Voter updated = dialog.getVoter();
+            voterModel->updateVoter(id, updated);
+        }
+    });
+
     setWindowTitle("PoliticalSim");
 
     partyModel = new PartyModel("main_connection", this);
