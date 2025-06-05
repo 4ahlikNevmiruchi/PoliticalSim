@@ -13,7 +13,8 @@ class AddVoterDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit AddVoterDialog(QWidget *parent = nullptr, PartyModel *partyModel = nullptr);
+    explicit AddVoterDialog(QWidget *parent = nullptr, PartyModel* partyModel = nullptr);
+
     ~AddVoterDialog();
 
     Voter getVoter() const;
@@ -25,6 +26,9 @@ public:
 private:
     Ui::AddVoterDialog *ui;
     QVector<Party> partyList;
+    PartyModel* m_partyModel = nullptr;
+    int m_voterId = -1;
+
 };
 
 #endif // ADDVOTERDIALOG_H

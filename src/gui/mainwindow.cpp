@@ -61,6 +61,9 @@ MainWindow::MainWindow(QWidget *parent)
         if (dialog.exec() == QDialog::Accepted) {
             Party updated = dialog.getParty();
             partyModel->updateParty(id, updated);
+
+            partyModel->reloadData();
+            voterModel->reloadData();
         }
     });
 
@@ -72,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
         int id = voterModel->getVoterIdAt(row);
         Voter oldVoter = voterModel->getVoterAt(row);
 
-        AddVoterDialog dialog(this);
+        AddVoterDialog dialog(this, partyModel);
         dialog.setVoter(oldVoter);
 
         if (dialog.exec() == QDialog::Accepted) {
