@@ -114,6 +114,10 @@ MainWindow::MainWindow(QWidget *parent)
         voterModel->reloadData();
     });
 
+    connect(ui->voterSearchEdit, &QLineEdit::textChanged, this, [=](const QString &text) {
+        voterProxyModel->setFilterFixedString(text);
+    });
+
     setWindowTitle("PoliticalSim");
 
     partyModel = new PartyModel("main_connection", this);
@@ -125,6 +129,14 @@ MainWindow::MainWindow(QWidget *parent)
     ui->voterTableView->setModel(voterModel);
 
     voterModel->reloadData();
+
+    voterProxyModel = new QSortFilterProxyModel(this);
+    voterProxyModel->setSourceModel(voterModel);
+    voterProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    voterProxyModel->setFilterKeyColumn(-1); // Search all columns
+
+    ui->voterTableView->setModel(voterProxyModel);
+
 
     connect(partyModel, &PartyModel::partyAdded, partyModel, &PartyModel::reloadData);
     connect(partyModel, &PartyModel::partyUpdated, partyModel, &PartyModel::reloadData);

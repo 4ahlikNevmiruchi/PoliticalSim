@@ -4,6 +4,7 @@
 #include "models/VoterModel.h"
 
 #include <QMainWindow>
+#include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,6 +31,7 @@ private:
 
     PartyModel* partyModel;
     VoterModel *voterModel;
+    QSortFilterProxyModel* voterProxyModel;
 };
 
 #endif // MAINWINDOW_H

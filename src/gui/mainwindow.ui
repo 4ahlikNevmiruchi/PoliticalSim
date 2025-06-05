@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1447</width>
-    <height>474</height>
+    <width>1150</width>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,17 +18,17 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>60</y>
-      <width>761</width>
-      <height>192</height>
+      <y>11</y>
+      <width>501</width>
+      <height>241</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="addPartyButton">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>290</y>
+      <x>30</x>
+      <y>260</y>
       <width>80</width>
       <height>24</height>
      </rect>
@@ -40,18 +40,27 @@
    <widget class="QTableView" name="voterTableView">
     <property name="geometry">
      <rect>
-      <x>830</x>
+      <x>550</x>
       <y>60</y>
       <width>581</width>
-      <height>192</height>
+      <height>491</height>
      </rect>
+    </property>
+    <property name="mouseTracking">
+     <bool>true</bool>
+    </property>
+    <property name="dragEnabled">
+     <bool>true</bool>
+    </property>
+    <property name="sortingEnabled">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="addVoterButton">
     <property name="geometry">
      <rect>
-      <x>970</x>
-      <y>290</y>
+      <x>450</x>
+      <y>280</y>
       <width>80</width>
       <height>24</height>
      </rect>
@@ -63,8 +72,8 @@
    <widget class="QPushButton" name="deletePartyButton">
     <property name="geometry">
      <rect>
-      <x>550</x>
-      <y>290</y>
+      <x>210</x>
+      <y>260</y>
       <width>80</width>
       <height>24</height>
      </rect>
@@ -76,8 +85,8 @@
    <widget class="QPushButton" name="deleteVoterButton">
     <property name="geometry">
      <rect>
-      <x>1260</x>
-      <y>290</y>
+      <x>450</x>
+      <y>360</y>
       <width>80</width>
       <height>24</height>
      </rect>
@@ -89,8 +98,8 @@
    <widget class="QPushButton" name="editPartyButton">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>290</y>
+      <x>120</x>
+      <y>260</y>
       <width>80</width>
       <height>24</height>
      </rect>
@@ -102,8 +111,8 @@
    <widget class="QPushButton" name="editVoterButton">
     <property name="geometry">
      <rect>
-      <x>1110</x>
-      <y>290</y>
+      <x>450</x>
+      <y>320</y>
       <width>80</width>
       <height>24</height>
      </rect>
@@ -125,13 +134,26 @@
      <string>Reset</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="voterSearchEdit">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>10</y>
+      <width>361</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Search voters...</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1447</width>
+     <width>1150</width>
      <height>21</height>
     </rect>
    </property>
