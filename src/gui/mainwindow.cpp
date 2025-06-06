@@ -86,16 +86,19 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
+    connect(ui->voterSearchEdit, &QLineEdit::textChanged, this, [=](const QString &text) {
+        voterProxyModel->setFilterFixedString(text);
+    });
+
     connect(ui->resetButton, &QPushButton::clicked, this, [=]() {
         QMessageBox::StandardButton reply = QMessageBox::warning(
             this,
             "Confirm Reset",
-            "Are you sure you want to overwrite all existing data with the default values?\nThis cannot be undone.",
+            "Are you sure you want to overwrite all existing data with default values?",
             QMessageBox::Yes | QMessageBox::No
             );
 
-        if (reply != QMessageBox::Yes)
-            return;
+        if (reply != QMessageBox::Yes) return;
 
         QSqlDatabase db = QSqlDatabase::database("main_connection");
         if (!db.isOpen()) {
@@ -103,19 +106,26 @@ MainWindow::MainWindow(QWidget *parent)
             return;
         }
 
-        QSqlQuery clearQuery(db);
-        clearQuery.exec("DELETE FROM voters");
-        clearQuery.exec("DELETE FROM parties");
+        // Delete all data
+        QSqlQuery clear(db);
+        clear.exec("DELETE FROM voters");
+        clear.exec("DELETE FROM parties");
 
+        // Repopulate
         partyModel->ensurePartiesPopulated(db);
-        voterModel->ensureVotersPopulated(db);
+        partyModel->reloadData(); // ensure party table is loaded before mapping
 
-        partyModel->reloadData();
+        // Build fresh partyMap
+        QMap<QString, int> partyMap;
+        for (int i = 0; i < partyModel->rowCount(); ++i) {
+            QModelIndex index = partyModel->index(i, 0); // column 0 = name
+            QString name = partyModel->data(index, Qt::DisplayRole).toString();
+            int id = partyModel->data(index, Qt::UserRole).toInt();
+            partyMap.insert(name, id);
+        }
+
+        voterModel->ensureVotersPopulated(db, partyMap);
         voterModel->reloadData();
-    });
-
-    connect(ui->voterSearchEdit, &QLineEdit::textChanged, this, [=](const QString &text) {
-        voterProxyModel->setFilterFixedString(text);
     });
 
     setWindowTitle("PoliticalSim");
@@ -123,12 +133,25 @@ MainWindow::MainWindow(QWidget *parent)
     partyModel = new PartyModel("main_connection", this);
     ui->partyTableView->setModel(partyModel);
 
+
+
+    QMap<QString, int> partyMap;
+    for (int i = 0; i < partyModel->rowCount(); ++i) {
+        QModelIndex index = partyModel->index(i, 0);
+        QString name = partyModel->data(index, Qt::DisplayRole).toString();
+        int id = partyModel->data(index, Qt::UserRole).toInt();
+        partyMap.insert(name, id);
+    }
+
     partyModel->reloadData();
 
     voterModel = new VoterModel("main_connection", this);
     ui->voterTableView->setModel(voterModel);
 
     voterModel->reloadData();
+
+    QSqlDatabase db = QSqlDatabase::database("main_connection");
+    voterModel->ensureVotersPopulated(db, partyMap);
 
     voterProxyModel = new QSortFilterProxyModel(this);
     voterProxyModel->setSourceModel(voterModel);

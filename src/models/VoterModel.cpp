@@ -33,8 +33,6 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent)
                "party_id INTEGER, "
                "FOREIGN KEY (party_id) REFERENCES parties(id) ON DELETE SET NULL)");
 
-    ensureVotersPopulated(db);
-
     query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
                "FROM voters "
                "LEFT JOIN parties ON voters.party_id = parties.id");
@@ -134,48 +132,42 @@ void VoterModel::reloadData() {
     qDebug() << "[VoterModel] reloadData completed. Rows:" << m_voters.size();
 }
 
-bool VoterModel::ensureVotersPopulated(QSqlDatabase& db) {
-    QSqlQuery countQuery(db);
-    if (!countQuery.exec("SELECT COUNT(*) FROM voters")) {
-        qWarning() << "[VoterModel] Count query failed:" << countQuery.lastError().text();
-        return false;
-    }
+bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int>& partyNameToId) {
+    QSqlQuery query(db);
 
-    if (countQuery.next() && countQuery.value(0).toInt() == 0) {
+    QList<Voter> defaults = {
+        { -1, "John Doe", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Lisa Feymann", "Rationalist", partyNameToId.value("Green Force", -1) },
+        { -1, "Dmitri Ivanov", "Technocrat", partyNameToId.value("Tech Alliance", -1) },
+        { -1, "Sarah Blaine", "Conservative", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Marco Velasquez", "Progressive", partyNameToId.value("Unity Party", -1) },
+        { -1, "Aya Kim", "Eco-Socialist", partyNameToId.value("Green Force", -1) },
+        { -1, "Tom Becker", "Libertarian", partyNameToId.value("Freedom First", -1) },
+        { -1, "Emily Carter", "Moderate", partyNameToId.value("Unity Party", -1) },
+        { -1, "Nina Patel", "Leftist", partyNameToId.value("Green Force", -1) },
+        { -1, "Zhang Wei", "Innovator", partyNameToId.value("Tech Alliance", -1) },
+        { -1, "George Foster", "Traditionalist", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Laura Díaz", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Ravi Singh", "Environmentalist", partyNameToId.value("Green Force", -1) },
+        { -1, "Mia Wong", "Progressive", partyNameToId.value("Freedom First", -1) },
+        { -1, "Ahmed Karim", "Futurist", partyNameToId.value("Tech Alliance", -1) }
+    };
+
+    for (const auto& voter : defaults) {
         QSqlQuery insert(db);
-        insert.prepare("INSERT INTO voters (name, ideology, party_id) VALUES (?, ?, ?)");
+        insert.prepare("INSERT INTO voters (name, ideology, party_id) "
+                       "VALUES (:name, :ideology, :party_id)");
+        insert.bindValue(":name", voter.name);
+        insert.bindValue(":ideology", voter.ideology);
+        insert.bindValue(":party_id", voter.partyId != -1 ? QVariant(voter.partyId) : QVariant(QVariant::Int));
 
-        const QList<Voter> defaultVoters = {
-            { "John Doe", "Centrist", 1 },
-            { "Lisa Feynman", "Rationalist", 2 },
-            { "Clark Kent", "Moderate", 1 },
-            { "Sarah Connor", "Reformist", 3 },
-            { "Rick Sanchez", "Anarcho-Scientist", 4 },
-            { "Dana Scully", "Empiricist", 2 },
-            { "Mario Rossi", "Populist", 1 },
-            { "Leia Organa", "Progressive", 3 },
-            { "Walter White", "Pragmatist", 4 },
-            { "Bruce Wayne", "Individualist", 2 },
-            { "Tony Stark", "Techno-Libertarian", 3 },
-            { "Ada Lovelace", "Innovationist", 1 },
-            { "Sheldon Cooper", "Logic-Driven", 2 },
-            { "Captain Nemo", "Isolationist", 5 },
-            { "Harriet Tubman", "Freedom Fighter", 4 }
-        };
-
-        for (const Voter& v : defaultVoters) {
-            insert.addBindValue(v.name);
-            insert.addBindValue(v.ideology);
-            insert.addBindValue(v.partyId);
-            if (!insert.exec())
-                qWarning() << "[VoterModel] Insert failed:" << insert.lastError().text();
+        if (!insert.exec()) {
+            qWarning() << "[ensureVotersPopulated] Insert failed:" << insert.lastError();
+            return false;
         }
-
-        qDebug() << "[VoterModel] Seeded default voters.";
-        return true;
     }
 
-    return false;
+    return true;
 }
 
 int VoterModel::getVoterIdAt(int row) const {

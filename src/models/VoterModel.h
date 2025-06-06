@@ -24,7 +24,7 @@ public:
 
     void addVoter(const Voter& voter);
     void reloadData();
-    bool ensureVotersPopulated(QSqlDatabase& db);
+    bool ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int>& partyNameToId);
     int getVoterIdAt(int row) const;
     void deleteVoterById(int voterId);
     void updateVoter(int id, const Voter &updatedVoter);

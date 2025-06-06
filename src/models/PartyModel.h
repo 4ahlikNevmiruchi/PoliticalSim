@@ -43,7 +43,6 @@ public:
      * @param party The Party struct containing name, ideology, and popularity.
      */
     void addParty(const Party& party);
-
     bool ensurePartiesPopulated(QSqlDatabase& db);
     int getPartyIdAt(int row) const;
     void deletePartyById(int partyId);
