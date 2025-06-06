@@ -25,6 +25,9 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent)
         return;
     }
 
+    QSqlQuery pragma(db);
+    pragma.exec("PRAGMA foreign_keys = ON");
+
     QSqlQuery query(db);
     query.exec("CREATE TABLE IF NOT EXISTS voters ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -133,33 +136,80 @@ void VoterModel::reloadData() {
 }
 
 bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int>& partyNameToId) {
-    QSqlQuery query(db);
+    QSqlQuery deleteQuery(db);
+    if (!deleteQuery.exec("DELETE FROM voters")) {
+        qWarning() << "[ensureVotersPopulated] Failed to clear voters:" << deleteQuery.lastError();
+        return false;
+    }
 
     QList<Voter> defaults = {
+        // Unity Party (13)
         { -1, "John Doe", "Centrist", partyNameToId.value("Unity Party", -1) },
-        { -1, "Lisa Feymann", "Rationalist", partyNameToId.value("Green Force", -1) },
-        { -1, "Dmitri Ivanov", "Technocrat", partyNameToId.value("Tech Alliance", -1) },
-        { -1, "Sarah Blaine", "Conservative", partyNameToId.value("Tradition Front", -1) },
-        { -1, "Marco Velasquez", "Progressive", partyNameToId.value("Unity Party", -1) },
-        { -1, "Aya Kim", "Eco-Socialist", partyNameToId.value("Green Force", -1) },
-        { -1, "Tom Becker", "Libertarian", partyNameToId.value("Freedom First", -1) },
-        { -1, "Emily Carter", "Moderate", partyNameToId.value("Unity Party", -1) },
-        { -1, "Nina Patel", "Leftist", partyNameToId.value("Green Force", -1) },
-        { -1, "Zhang Wei", "Innovator", partyNameToId.value("Tech Alliance", -1) },
-        { -1, "George Foster", "Traditionalist", partyNameToId.value("Tradition Front", -1) },
-        { -1, "Laura Díaz", "Centrist", partyNameToId.value("Unity Party", -1) },
-        { -1, "Ravi Singh", "Environmentalist", partyNameToId.value("Green Force", -1) },
-        { -1, "Mia Wong", "Progressive", partyNameToId.value("Freedom First", -1) },
-        { -1, "Ahmed Karim", "Futurist", partyNameToId.value("Tech Alliance", -1) }
+        { -1, "Emma Clark", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Liam Brooks", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Noah Wright", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Olivia Lee", "Moderate", partyNameToId.value("Unity Party", -1) },
+        { -1, "James Hall", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Sophia Green", "Moderate", partyNameToId.value("Unity Party", -1) },
+        { -1, "Lucas Adams", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Mia Evans", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Benjamin Scott", "Moderate", partyNameToId.value("Unity Party", -1) },
+        { -1, "Ava Turner", "Centrist", partyNameToId.value("Unity Party", -1) },
+        { -1, "Ethan Lewis", "Moderate", partyNameToId.value("Unity Party", -1) },
+        { -1, "Isabella Young", "Centrist", partyNameToId.value("Unity Party", -1) },
+
+        // Green Force (8)
+        { -1, "Lily Cooper", "Environmentalism", partyNameToId.value("Green Force", -1) },
+        { -1, "Mason Reed", "Green Politics", partyNameToId.value("Green Force", -1) },
+        { -1, "Ella Walker", "Environmentalism", partyNameToId.value("Green Force", -1) },
+        { -1, "Logan Morris", "Ecologist", partyNameToId.value("Green Force", -1) },
+        { -1, "Chloe Hughes", "Sustainability", partyNameToId.value("Green Force", -1) },
+        { -1, "Elijah Rogers", "Environmentalism", partyNameToId.value("Green Force", -1) },
+        { -1, "Grace Foster", "Green Politics", partyNameToId.value("Green Force", -1) },
+        { -1, "Henry Bailey", "Environmentalism", partyNameToId.value("Green Force", -1) },
+
+        // Workers Union (10)
+        { -1, "Amelia Perez", "Socialist", partyNameToId.value("Workers Union", -1) },
+        { -1, "Jack Kelly", "Leftist", partyNameToId.value("Workers Union", -1) },
+        { -1, "Aria Rivera", "Socialist", partyNameToId.value("Workers Union", -1) },
+        { -1, "Daniel Bennett", "Marxist", partyNameToId.value("Workers Union", -1) },
+        { -1, "Harper Ramirez", "Social Democrat", partyNameToId.value("Workers Union", -1) },
+        { -1, "Sebastian Bell", "Progressive", partyNameToId.value("Workers Union", -1) },
+        { -1, "Victoria Morgan", "Socialist", partyNameToId.value("Workers Union", -1) },
+        { -1, "Joseph Murphy", "Progressive", partyNameToId.value("Workers Union", -1) },
+        { -1, "Emily Rivera", "Left-Wing", partyNameToId.value("Workers Union", -1) },
+        { -1, "Ryan Ward", "Socialist", partyNameToId.value("Workers Union", -1) },
+
+        // Liberty League (11)
+        { -1, "Zoe Jenkins", "Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "David Gray", "Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "Scarlett Cox", "Libertarian", partyNameToId.value("Liberty League", -1) },
+        { -1, "Leo James", "Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "Natalie Bailey", "Progressive", partyNameToId.value("Liberty League", -1) },
+        { -1, "Aiden Diaz", "Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "Abigail Wood", "Libertarian", partyNameToId.value("Liberty League", -1) },
+        { -1, "Samuel Patterson", "Social Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "Sofia Martinez", "Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "Owen Bell", "Liberal", partyNameToId.value("Liberty League", -1) },
+        { -1, "Lucy Peterson", "Libertarian", partyNameToId.value("Liberty League", -1) },
+
+        // Tradition Front (8)
+        { -1, "Michael Butler", "Conservative", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Madison Price", "Conservative", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Joshua Barnes", "Traditionalist", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Evelyn Sanders", "Conservative", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Luke Ross", "Right-Wing", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Hannah Jenkins", "Nationalist", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Carter Russell", "Conservative", partyNameToId.value("Tradition Front", -1) },
+        { -1, "Leah Coleman", "Right-Wing", partyNameToId.value("Tradition Front", -1) }
     };
 
-    for (const auto& voter : defaults) {
+    for (const Voter& voter : defaults) {
         QSqlQuery insert(db);
-        insert.prepare("INSERT INTO voters (name, ideology, party_id) "
-                       "VALUES (:name, :ideology, :party_id)");
+        insert.prepare("INSERT INTO voters (name, ideology, party_id) VALUES (:name, :ideology, :party_id)");
         insert.bindValue(":name", voter.name);
         insert.bindValue(":ideology", voter.ideology);
-        insert.bindValue(":party_id", voter.partyId != -1 ? QVariant(voter.partyId) : QVariant(QVariant::Int));
+        insert.bindValue(":party_id", voter.partyId != -1 ? QVariant(voter.partyId) : QVariant());
 
         if (!insert.exec()) {
             qWarning() << "[ensureVotersPopulated] Insert failed:" << insert.lastError();
@@ -167,6 +217,7 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int
         }
     }
 
+    qDebug() << "[VoterModel] Seeded default voters.";
     return true;
 }
 

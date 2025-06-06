@@ -3,6 +3,7 @@
 #include "addpartydialog.h"
 #include "addvoterdialog.h"
 #include <QSqlQuery>
+#include <QSqlError>
 #include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -108,8 +109,13 @@ MainWindow::MainWindow(QWidget *parent)
 
         // Delete all data
         QSqlQuery clear(db);
-        clear.exec("DELETE FROM voters");
-        clear.exec("DELETE FROM parties");
+        if (!clear.exec("DELETE FROM voters")) {
+            qWarning() << "[Reset] Failed to clear voters:" << clear.lastError().text();
+        }
+        if (!clear.exec("DELETE FROM parties")) {
+            qWarning() << "[Reset] Failed to clear parties:" << clear.lastError().text();
+        }
+
 
         // Repopulate
         partyModel->ensurePartiesPopulated(db);
