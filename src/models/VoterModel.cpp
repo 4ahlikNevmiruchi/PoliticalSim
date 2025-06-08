@@ -6,7 +6,7 @@
 #include <QVariant>
 #include <QDebug>
 
-VoterModel::VoterModel(const QString &connectionName, QObject *parent)
+VoterModel::VoterModel(const QString &connectionName, QObject *parent, const QString &dbPath)
     : QAbstractTableModel(parent), m_connectionName(connectionName)
 {
     Q_ASSERT(!m_connectionName.isEmpty());
@@ -18,7 +18,7 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent)
     }
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-    db.setDatabaseName("politicalsim.sqlite");
+    db.setDatabaseName(dbPath);
 
     if (!db.open()) {
         qWarning() << "[VoterModel] DB open failed:" << db.lastError();

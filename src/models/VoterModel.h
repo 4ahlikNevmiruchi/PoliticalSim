@@ -15,7 +15,7 @@ signals:
     void voterDeleted();
 
 public:
-    explicit VoterModel(const QString &connectionName, QObject *parent = nullptr);
+    explicit VoterModel(const QString &connectionName, QObject *parent = nullptr, const QString &dbPath = "politicalsim.sqlite");
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
