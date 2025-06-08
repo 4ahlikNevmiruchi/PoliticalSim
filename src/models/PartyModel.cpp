@@ -54,6 +54,10 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
     qDebug() << "[PartyModel] DB path: " << QSqlDatabase::database(m_connectionName).databaseName();
 }
 
+const QVector<Party>& PartyModel::getAllParties() const {
+    return m_parties;
+}
+
 int PartyModel::rowCount(const QModelIndex &) const {
     return m_parties.size();
 }
@@ -112,6 +116,7 @@ void PartyModel::addParty(const Party &party) {
     }
 
     emit partyAdded();
+    emit dataChangedExternally();
     //reloadData();
 }
 
@@ -189,6 +194,7 @@ void PartyModel::deletePartyById(int partyId) {
     }
 
     emit partyDeleted();
+    emit dataChangedExternally();
     //reloadData();
 }
 
@@ -211,6 +217,7 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
     }
 
     emit partyUpdated();
+    emit dataChangedExternally();
     //reloadData();
 }
 

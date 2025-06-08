@@ -1,9 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include <QMainWindow>
 #include "models/PartyModel.h"
 #include "models/VoterModel.h"
-
-#include <QMainWindow>
 #include <QSortFilterProxyModel>
 
 QT_BEGIN_NAMESPACE
@@ -32,6 +31,8 @@ private:
     PartyModel* partyModel;
     VoterModel *voterModel;
     QSortFilterProxyModel* voterProxyModel;
+    void setupButtonConnections();
+    void resetDatabase();
 };
 
 #endif // MAINWINDOW_H

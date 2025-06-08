@@ -6,165 +6,122 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1150</width>
-    <height>601</height>
+    <width>1010</width>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>PoliticalSim</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTableView" name="partyTableView">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>11</y>
-      <width>501</width>
-      <height>241</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="addPartyButton">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>260</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add Party</string>
-    </property>
-   </widget>
-   <widget class="QTableView" name="voterTableView">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
-      <y>60</y>
-      <width>581</width>
-      <height>491</height>
-     </rect>
-    </property>
-    <property name="mouseTracking">
-     <bool>true</bool>
-    </property>
-    <property name="dragEnabled">
-     <bool>true</bool>
-    </property>
-    <property name="sortingEnabled">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="addVoterButton">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>280</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add Voter</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="deletePartyButton">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>260</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Delete Party</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="deleteVoterButton">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>360</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Delete Voter</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="editPartyButton">
-    <property name="geometry">
-     <rect>
-      <x>120</x>
-      <y>260</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Edit Party</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="editVoterButton">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>320</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Edit Voter</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="resetButton">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>390</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Reset</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="voterSearchEdit">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
-      <y>10</y>
-      <width>361</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="placeholderText">
-     <string>Search voters...</string>
-    </property>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0" rowspan="3">
+     <widget class="QWidget" name="partyContainer" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QTableView" name="partyTableView"/>
+       </item>
+       <item>
+        <widget class="QWidget" name="partyButtonsContainer" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QPushButton" name="addPartyButton">
+            <property name="text">
+             <string>Add Party</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="deletePartyButton">
+            <property name="text">
+             <string>Delete Party</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="editPartyButton">
+            <property name="text">
+             <string>Edit Party</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="chartContainer" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QWidget" name="partyChartWidget" native="true"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="1" rowspan="3">
+     <widget class="QWidget" name="voterContainer" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QPushButton" name="resetButton">
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="voterSearchEdit">
+         <property name="placeholderText">
+          <string>Search voters...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableView" name="voterTableView">
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
+         <property name="dragEnabled">
+          <bool>true</bool>
+         </property>
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="voterButtonsContainer" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="addVoterButton">
+            <property name="text">
+             <string>Add Voter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="editVoterButton">
+            <property name="text">
+             <string>Edit Voter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="deleteVoterButton">
+            <property name="text">
+             <string>Delete Voter</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1150</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuPoliticalSim">
-    <property name="title">
-     <string>PoliticalSim</string>
-    </property>
-   </widget>
-   <addaction name="menuPoliticalSim"/>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

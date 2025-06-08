@@ -4,7 +4,7 @@ project(PoliticalSim)
 set(CMAKE_CXX_STANDARD 17)
 
 # Find required Qt components
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql Charts)
 
 # Enable Qt automoc, autouic, autorcc
 set(CMAKE_AUTOMOC ON)
@@ -45,6 +45,9 @@ add_executable(PoliticalSim
     src/models/VoterModel.h
     src/models/VoterModel.cpp
     src/gui/addvoterdialog.h src/gui/addvoterdialog.cpp src/gui/addvoterdialog.ui
+
+    src/widgets/PartyChartWidget.cpp
+    src/widgets/PartyChartWidget.h
 )
 
 # Includes for GUI
@@ -60,6 +63,7 @@ target_link_libraries(PoliticalSim
     Qt6::Core
     Qt6::Widgets
     Qt6::Sql
+    Qt6::Charts
 )
 
 # Unit Test Target

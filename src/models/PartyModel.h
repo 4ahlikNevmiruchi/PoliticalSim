@@ -26,6 +26,8 @@ signals:
     void partyAdded();
     void partyUpdated();
     void partyDeleted();
+    void dataChangedExternally();
+
 
 public:
     QString m_connectionName;
@@ -48,6 +50,8 @@ public:
     void deletePartyById(int partyId);
     void reloadData();
     void updateParty(int id, const Party &updatedParty);
+    const QVector<Party>& getAllParties() const;
+
 
     Party getPartyAt(int row) const;
 
