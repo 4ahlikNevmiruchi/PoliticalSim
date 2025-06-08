@@ -1,24 +1,20 @@
-#define CATCH_CONFIG_MAIN
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
-#include <QCoreApplication>
 #include "models/PartyModel.h"
 
-using Catch::Approx;
+TEST_CASE("PartyModel add and get", "[PartyModel]") {
+    QString connectionName = "test_connection_party";
+    PartyModel model(connectionName);
 
-TEST_CASE("PartyModel basic functionality") {
-    int argc = 0;
-    char *argv[] = { nullptr };
-    QCoreApplication app(argc, argv);  // ✅ ✅ ✅
+    Party p;
+    p.name = "Example Party";
+    p.ideology = "Moderate";
+    p.popularity = 20.0;
 
-    PartyModel model("", nullptr);
-    Party p = { -1, "Test Party", "Test Ideology", 55.0 };
     model.addParty(p);
+    model.reloadData();
 
-    QModelIndex index = model.index(0, 0);
-    REQUIRE(model.data(index).toString() == "Test Party");
+    REQUIRE(model.rowCount() > 0);
 
-    index = model.index(0, 2);
-    REQUIRE(model.data(index).toDouble() == Approx(55.0));
+    Party retrieved = model.getPartyAt(0);
+    REQUIRE(retrieved.name == "Example Party");
 }

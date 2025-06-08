@@ -70,7 +70,13 @@ target_link_libraries(PoliticalSim
 add_executable(UnitTests
     tests/test_party_model.cpp
     tests/test_party_db.cpp
+    tests/test_voter_model.cpp
+
     src/models/PartyModel.cpp
+    src/models/VoterModel.cpp
+
+    src/models/PartyModel.h
+    src/models/Voter.h
 )
 
 # Includes for UnitTests (including Catch2)
