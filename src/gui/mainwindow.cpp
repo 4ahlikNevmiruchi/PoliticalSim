@@ -7,6 +7,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QDebug>
 
 PartyChartWidget *partyChart;
 
@@ -35,12 +36,30 @@ MainWindow::MainWindow(QWidget *parent)
     voterProxyModel->setFilterKeyColumn(-1);
     ui->voterTableView->setModel(voterProxyModel);
 
+    //Signals to autorefresh UI
+    connect(partyModel, &PartyModel::partyAdded, partyModel, &PartyModel::reloadData);
+    connect(partyModel, &PartyModel::partyUpdated, partyModel, &PartyModel::reloadData);
+    connect(partyModel, &PartyModel::partyDeleted, partyModel, &PartyModel::reloadData);
+    connect(partyModel, &PartyModel::partyUpdated, voterModel, &VoterModel::reloadData);
+
+    connect(voterModel, &VoterModel::voterAdded, voterModel, &VoterModel::reloadData);
+    connect(voterModel, &VoterModel::voterUpdated, voterModel, &VoterModel::reloadData);
+    connect(voterModel, &VoterModel::voterDeleted, voterModel, &VoterModel::reloadData);
+
+
     //Tables allignment
     ui->partyTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->voterTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->partyTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->voterTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    //Tables row selection enforcment
+    ui->partyTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->voterTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->partyTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->voterTableView->setSelectionMode(QAbstractItemView::SingleSelection);
+
 
     // Database
     QSqlDatabase db = QSqlDatabase::database("main_connection");
@@ -82,6 +101,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::setupButtonConnections() {
     connect(ui->addPartyButton, &QPushButton::clicked, this, [=]() {
+        qDebug() << "[UI] Add Party clicked";
         AddPartyDialog dialog(this);
         if (dialog.exec() == QDialog::Accepted) {
             partyModel->addParty(dialog.getParty());
@@ -89,6 +109,7 @@ void MainWindow::setupButtonConnections() {
     });
 
     connect(ui->editPartyButton, &QPushButton::clicked, this, [=]() {
+        qDebug() << "[UI] Edit Party clicked";
         QModelIndex index = ui->partyTableView->currentIndex();
         if (!index.isValid()) return;
         int id = partyModel->getPartyIdAt(index.row());
@@ -102,6 +123,7 @@ void MainWindow::setupButtonConnections() {
     });
 
     connect(ui->deletePartyButton, &QPushButton::clicked, this, [=]() {
+        qDebug() << "[UI] Delete Party clicked";
         QModelIndex index = ui->partyTableView->currentIndex();
         if (!index.isValid()) return;
         int id = partyModel->getPartyIdAt(index.row());
@@ -109,6 +131,7 @@ void MainWindow::setupButtonConnections() {
     });
 
     connect(ui->addVoterButton, &QPushButton::clicked, this, [=]() {
+        qDebug() << "[UI] Add Voter clicked";
         AddVoterDialog dialog(this, partyModel);
         if (dialog.exec() == QDialog::Accepted) {
             voterModel->addVoter(dialog.getVoter());
@@ -116,6 +139,7 @@ void MainWindow::setupButtonConnections() {
     });
 
     connect(ui->editVoterButton, &QPushButton::clicked, this, [=]() {
+        qDebug() << "[UI] Edit Voter clicked";
         QModelIndex index = ui->voterTableView->currentIndex();
         if (!index.isValid()) return;
         int id = voterModel->getVoterIdAt(index.row());
@@ -129,6 +153,7 @@ void MainWindow::setupButtonConnections() {
     });
 
     connect(ui->deleteVoterButton, &QPushButton::clicked, this, [=]() {
+        qDebug() << "[UI] Delte Voter clicked";
         QModelIndex index = ui->voterTableView->currentIndex();
         if (!index.isValid()) return;
         int id = voterModel->getVoterIdAt(index.row());
