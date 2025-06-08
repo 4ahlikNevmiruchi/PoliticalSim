@@ -35,6 +35,13 @@ MainWindow::MainWindow(QWidget *parent)
     voterProxyModel->setFilterKeyColumn(-1);
     ui->voterTableView->setModel(voterProxyModel);
 
+    //Tables allignment
+    ui->partyTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->voterTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
+    ui->partyTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->voterTableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+
     // Database
     QSqlDatabase db = QSqlDatabase::database("main_connection");
     partyModel->ensurePartiesPopulated(db);
