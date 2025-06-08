@@ -7,7 +7,7 @@
 #include <QDebug>
 
 //  Custom constructor (used in real app or tests with connection name)
-PartyModel::PartyModel(const QString &connectionName, QObject *parent)
+PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seedDefaults, const QString &dbPath)
     : QAbstractTableModel(parent), m_connectionName(connectionName)
 {
     Q_ASSERT(!connectionName.isEmpty());  //Prevent accidental usage
@@ -25,7 +25,7 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
 
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
-    db.setDatabaseName("politicalsim.sqlite");
+    db.setDatabaseName(dbPath);
 
     if (!db.open()) {
         qWarning() << "DB open failed:" << db.lastError();
@@ -39,7 +39,8 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent)
                "ideology TEXT, "
                "popularity REAL)");
 
-    ensurePartiesPopulated(db);
+    if (seedDefaults)
+        ensurePartiesPopulated(db);
 
     query.exec("SELECT id, name, ideology, popularity FROM parties");
     while (query.next()) {

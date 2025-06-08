@@ -3,7 +3,7 @@
 
 TEST_CASE("PartyModel add and get", "[PartyModel]") {
     QString connectionName = "test_connection_party";
-    PartyModel model(connectionName);
+    PartyModel model("test_connection_party", nullptr, false, "test_party_model.sqlite");
 
     Party p;
     p.name = "Example Party";

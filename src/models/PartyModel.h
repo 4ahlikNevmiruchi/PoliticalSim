@@ -32,7 +32,10 @@ signals:
 public:
     QString m_connectionName;
 
-    explicit PartyModel(const QString &connectionName, QObject *parent = nullptr);
+    explicit PartyModel(const QString &connectionName,
+                        QObject *parent = nullptr,
+                        bool seedDefaults = true,
+                        const QString &dbPath = "politicalsim.sqlite");
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

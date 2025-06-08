@@ -36,7 +36,7 @@ TEST_CASE("PartyModel inserts and loads from persistent DB", "[database]") {
     QFile::remove(dbFile);
 
     SECTION("Insert party and verify persistence") {
-        PartyModel model(connName);
+        PartyModel model(connName, nullptr, false, dbFile);
         Party testParty;
         testParty.name = "DB Party";
         testParty.ideology = "Techno-Centrism";
@@ -53,7 +53,7 @@ TEST_CASE("PartyModel inserts and loads from persistent DB", "[database]") {
     SECTION("Reload model from same DB file") {
         REQUIRE(QFile::exists(dbFile));
 
-        PartyModel reloaded(connName);
+        PartyModel reloaded(connName, nullptr, false, dbFile);
         reloaded.reloadData();
 
         REQUIRE(reloaded.rowCount() == 1);
