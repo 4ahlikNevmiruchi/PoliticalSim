@@ -136,13 +136,15 @@ void VoterModel::reloadData() {
 }
 
 bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int>& partyNameToId) {
-    QSqlQuery deleteQuery(db);
-    if (!deleteQuery.exec("DELETE FROM voters")) {
-        qWarning() << "[ensureVotersPopulated] Failed to clear voters:" << deleteQuery.lastError();
+    QSqlQuery countQuery(db);
+    if (!countQuery.exec("SELECT COUNT(*) FROM voters")) {
+        qWarning() << "[ensureVotersPopulated] Count query failed:"
+                   << countQuery.lastError().text();
         return false;
     }
-
-    QList<Voter> defaults = {
+    if (countQuery.next() && countQuery.value(0).toInt() == 0) {
+        // Seed default voters only if none exist
+        QList<Voter> defaults = {
         // Unity Party (13)
         { -1, "John Doe", "Centrist", partyNameToId.value("Unity Party", -1) },
         { -1, "Emma Clark", "Centrist", partyNameToId.value("Unity Party", -1) },
@@ -202,23 +204,25 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int
         { -1, "Hannah Jenkins", "Nationalist", partyNameToId.value("Tradition Front", -1) },
         { -1, "Carter Russell", "Conservative", partyNameToId.value("Tradition Front", -1) },
         { -1, "Leah Coleman", "Right-Wing", partyNameToId.value("Tradition Front", -1) }
-    };
-
-    for (const Voter& voter : defaults) {
-        QSqlQuery insert(db);
-        insert.prepare("INSERT INTO voters (name, ideology, party_id) VALUES (:name, :ideology, :party_id)");
-        insert.bindValue(":name", voter.name);
-        insert.bindValue(":ideology", voter.ideology);
-        insert.bindValue(":party_id", voter.partyId != -1 ? QVariant(voter.partyId) : QVariant());
-
-        if (!insert.exec()) {
-            qWarning() << "[ensureVotersPopulated] Insert failed:" << insert.lastError();
-            return false;
+        };
+        for (const Voter& voter : defaults) {
+            QSqlQuery insert(db);
+            insert.prepare("INSERT INTO voters (name, ideology, party_id) "
+                           "VALUES (:name, :ideology, :party_id)");
+            insert.bindValue(":name", voter.name);
+            insert.bindValue(":ideology", voter.ideology);
+            insert.bindValue(":party_id",
+                             voter.partyId != -1 ? QVariant(voter.partyId) : QVariant());  // NULL if -1
+            if (!insert.exec()) {
+                qWarning() << "[ensureVotersPopulated] Insert failed:"
+                           << insert.lastError().text();
+                return false;
+            }
         }
+        qDebug() << "[VoterModel] Seeded default voters.";
+        return true;
     }
-
-    qDebug() << "[VoterModel] Seeded default voters.";
-    return true;
+    return false;
 }
 
 int VoterModel::getVoterIdAt(int row) const {

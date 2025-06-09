@@ -269,4 +269,16 @@ double PartyModel::calculatePopularity(int partyId) const {
 
 void PartyModel::setVoterModel(VoterModel* model) {
     voterModel = model;
+    connect(model, &VoterModel::voterAdded,    this, &PartyModel::recalculatePopularityFromVoters);
+    connect(model, &VoterModel::voterUpdated,  this, &PartyModel::recalculatePopularityFromVoters);
+    connect(model, &VoterModel::voterDeleted,  this, &PartyModel::recalculatePopularityFromVoters);
+}
+
+void PartyModel::recalculatePopularityFromVoters() {
+    if (!voterModel) return;
+    if (m_parties.isEmpty()) return;
+    // Notify that all parties' popularity data has changed (column 2 in the model)
+    emit dataChanged(index(0, 2), index(rowCount() - 1, 2));
+    // Also notify external listeners (e.g., the chart widget) of data change
+    emit dataChangedExternally();
 }

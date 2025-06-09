@@ -12,14 +12,7 @@
 
 PartyChartWidget *partyChart;
 
-/**
- * @brief MainWindow::MainWindow Constructor for main UI window
- *
- * - Initializes models (Party/Voter)
- * - Binds models to views and filters
- * - Populates default data if DB empty
- * - Sets up chart widget inside `chartContainer`
- */
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -28,6 +21,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     partyModel = new PartyModel("main_connection", this);
     voterModel = new VoterModel("main_connection", this);
+
+    partyModel->setVoterModel(voterModel);
+
     voterProxyModel = new QSortFilterProxyModel(this);
 
     // Models → Views
@@ -46,9 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(voterModel, &VoterModel::voterAdded, voterModel, &VoterModel::reloadData);
     connect(voterModel, &VoterModel::voterUpdated, voterModel, &VoterModel::reloadData);
     connect(voterModel, &VoterModel::voterDeleted, voterModel, &VoterModel::reloadData);
-
-    // Link voter model to party model
-    partyModel->setVoterModel(voterModel);
 
     // Recalculate chart on data change
     connect(voterModel, &VoterModel::voterAdded, partyModel, [&] {

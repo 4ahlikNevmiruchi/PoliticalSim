@@ -1,28 +1,38 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QMainWindow>
+
 #include "models/PartyModel.h"
 #include "models/VoterModel.h"
+
 #include <QSortFilterProxyModel>
 
-QT_BEGIN_NAMESPACE
+
 namespace Ui {
 class MainWindow;
 }
-QT_END_NAMESPACE
 
 /**
- * @brief Main application window
- * 
- * @details Displays party data in a table view and handles user interactions
- * such as adding new parties.
+ * @brief Main application window for PoliticalSim.
+ *
+ * @details The MainWindow sets up the UI, initializes the Party and Voter models,
+ * populates default data if needed, and manages user interactions (adding parties/voters, reset).
  */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructs the main application window.
+     * @param parent Optional parent widget.
+     *
+     * Sets up UI components and models, and ensures the database is initialized with default
+     * data if empty. Also connects UI signals (buttons, etc.) to their respective slots.
+     */
     explicit MainWindow(QWidget *parent = nullptr);
+    /** @brief Destructor for MainWindow. Cleans up the UI and models. */
     ~MainWindow();
 
 private:
