@@ -26,7 +26,7 @@ struct ScopedFileRemover {
 TEST_CASE("Party popularity is derived from voters", "[derived-popularity]") {
     const QString connName = "test_popularity_connection";
     const QString dbPath = "test_popularity.sqlite";
-    ScopedFileRemover cleanup(dbPath);
+    //ScopedFileRemover cleanup(dbPath);
 
     // Init models
     PartyModel partyModel(connName, nullptr, false, dbPath);
@@ -52,10 +52,10 @@ TEST_CASE("Party popularity is derived from voters", "[derived-popularity]") {
 
     // Seed 3 Alpha votes, 1 Beta vote
     QList<Voter> voters = {
-                           { -1, "A", "X", partyMap["Alpha"] },
-                           { -1, "B", "X", partyMap["Alpha"] },
-                           { -1, "C", "X", partyMap["Alpha"] },
-                           { -1, "D", "X", partyMap["Beta"] },
+                           {"A", "X", partyMap["Alpha"] },
+                           {"B", "X", partyMap["Alpha"] },
+                           {"C", "X", partyMap["Alpha"] },
+                           {"D", "X", partyMap["Beta"] },
                            };
 
     for (const auto& v : voters)
@@ -76,5 +76,5 @@ TEST_CASE("Party popularity is derived from voters", "[derived-popularity]") {
     REQUIRE(alphaPopularity2 == Catch::Approx(75.0));
     REQUIRE(betaPopularity2 == Catch::Approx(25.0));
 
-    QSqlDatabase::removeDatabase(connName);
+    //QSqlDatabase::removeDatabase(connName);
 }

@@ -5,7 +5,9 @@
 
 #include "models/PartyModel.h"
 #include "models/VoterModel.h"
+
 #include "widgets/VoterIdeologyChartWidget.h"
+#include "widgets/SingleVoterIdeologyWidget.h"
 #include "widgets/PartyChartWidget.h"
 
 #include <QSortFilterProxyModel>
@@ -47,6 +49,7 @@ private:
     void resetDatabase();
 
     VoterIdeologyChartWidget* voterChart;
+    SingleVoterIdeologyWidget* voterFocusChart;
     PartyChartWidget *partyChart;
 };
 

@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 TEST_CASE("PartyModel inserts and loads from persistent DB", "[database]") {
     const QString connName = "test_party_connection";
     const QString dbFile = "test_parties.sqlite";
-    ScopedFileRemover cleanup(dbFile);
+    //ScopedFileRemover cleanup(dbFile);
 
     Party testParty;
     testParty.name = "DB Party";
@@ -67,5 +67,5 @@ TEST_CASE("PartyModel inserts and loads from persistent DB", "[database]") {
         REQUIRE(reloaded.rowCount() >= 1);
         REQUIRE(reloaded.data(reloaded.index(0, 0)).toString() == "DB Party");
     }
-    QSqlDatabase::removeDatabase(connName);
+    //QSqlDatabase::removeDatabase(connName);
 }

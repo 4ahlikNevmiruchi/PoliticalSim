@@ -2,12 +2,12 @@
 #define PARTYMODEL_H
 
 #include "Voter.h"
-#include "VoterModel.h"
 
 #include <QAbstractTableModel>
 #include <QString>
 #include <QVector>
 #include <QSqlDatabase>
+class VoterModel;
 
 struct Party {
     int id = -1;
@@ -89,6 +89,7 @@ public:
     const QVector<Party>& getAllParties() const;
     Party getPartyAt(int row) const;
     const VoterModel* voterModel = nullptr;
+    const PartyModel* partyModel = nullptr;
     void setVoterModel(VoterModel* model);
     double calculatePopularity(int partyId) const;
 

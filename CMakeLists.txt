@@ -56,6 +56,9 @@ add_executable(PoliticalSim
 
     src/widgets/VoterIdeologyChartWidget.h
     src/widgets/VoterIdeologyChartWidget.cpp
+
+    src/widgets/SingleVoterIdeologyWidget.h
+    src/widgets/SingleVoterIdeologyWidget.cpp
 )
 
 # Includes for GUI
@@ -76,7 +79,7 @@ target_link_libraries(PoliticalSim
 
 # Unit Test Target
 add_executable(UnitTests
-    tests/test_party_model.cpp
+
     tests/test_party_db.cpp
     tests/test_voter_model.cpp
     tests/test_party_popularity.cpp
@@ -84,10 +87,12 @@ add_executable(UnitTests
     src/utilities/ScopedFileRemover.h
 
     src/models/PartyModel.cpp
-    src/models/VoterModel.cpp
-
     src/models/PartyModel.h
+
+
     src/models/Voter.h
+    src/models/VoterModel.cpp
+    src/models/VoterModel.h
 )
 
 # Includes for UnitTests (including Catch2)

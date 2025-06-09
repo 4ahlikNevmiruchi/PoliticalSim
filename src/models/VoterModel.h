@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QSqlDatabase>
 #include "Voter.h"
+class PartyModel;
 
 /**
  * @brief Manages the list of voters (citizens) and their affiliations.
@@ -14,7 +15,6 @@
  */
 class VoterModel : public QAbstractTableModel {
     Q_OBJECT
-
 
 signals:
     /** @brief Emitted after a new voter is added to the database. */
@@ -71,11 +71,15 @@ public:
     QMap<int, int> countVotersPerParty() const;
     int totalVoters() const;
     Voter getVoterAt(int row) const;
+    int findClosestPartyId(int x, int y) const;
+
+    void setPartyModel(const PartyModel* model);  // Needed for access
 
 
 private:
     QString m_connectionName;
     QVector<Voter> m_voters;
+    const PartyModel* partyModel = nullptr;
 };
 
 #endif // VOTERMODEL_H

@@ -9,7 +9,6 @@
 #include <QMessageBox>
 #include <QDebug>
 
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -20,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     voterModel = new VoterModel("main_connection", this);
 
     partyModel->setVoterModel(voterModel);
+    voterModel->setPartyModel(partyModel);
 
     voterProxyModel = new QSortFilterProxyModel(this);
 
@@ -40,10 +40,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(voterModel, &VoterModel::voterUpdated, voterModel, &VoterModel::reloadData);
     connect(voterModel, &VoterModel::voterDeleted, voterModel, &VoterModel::reloadData);
 
-    connect(voterModel, &VoterModel::voterAdded, voterChart, &VoterIdeologyChartWidget::updateChart);
-    connect(voterModel, &VoterModel::voterUpdated, voterChart, &VoterIdeologyChartWidget::updateChart);
-    connect(voterModel, &VoterModel::voterDeleted, voterChart, &VoterIdeologyChartWidget::updateChart);
-
     // Recalculate chart on data change
     connect(voterModel, &VoterModel::voterAdded, partyModel, [&] {
         emit partyModel->dataChangedExternally();
@@ -54,9 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(voterModel, &VoterModel::voterDeleted, partyModel, [&] {
         emit partyModel->dataChangedExternally();
     });
-
-    connect(partyModel, &PartyModel::dataChangedExternally, partyChart, &PartyChartWidget::onDataChanged);
-
 
     //Tables allignment
     ui->partyTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -87,6 +80,8 @@ MainWindow::MainWindow(QWidget *parent)
         partyMap.insert(name, id);
     }
 
+    voterModel->setPartyModel(partyModel);
+
     voterModel->ensureVotersPopulated(db, partyMap);
     voterModel->reloadData();
     //partyModel->recalculatePopularityFromVoters(voterModel);
@@ -98,20 +93,29 @@ MainWindow::MainWindow(QWidget *parent)
 
     //Charts Setup
     partyChart = new PartyChartWidget(partyModel, this);
-    if (!ui->chartContainer->layout()) {
-        auto *layout = new QVBoxLayout(ui->chartContainer);
+    if (!ui->partyChartContainer->layout()) {
+        auto *layout = new QVBoxLayout(ui->partyChartContainer);
         layout->setContentsMargins(0, 0, 0, 0);
-        ui->chartContainer->setLayout(layout);
+        ui->partyChartContainer->setLayout(layout);
     }
-    ui->chartContainer->layout()->addWidget(partyChart);
+    ui->partyChartContainer->layout()->addWidget(partyChart);
     partyChart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    ui->chartContainer->setMinimumSize(QSize(0, 0));
+    ui->partyChartContainer->setMinimumSize(QSize(0, 0));
 
     voterChart = new VoterIdeologyChartWidget(this);
     voterChart->setVoterModel(voterModel);
-    ui->chartContainer->layout()->addWidget(voterChart);
+    ui->partyChartContainer->layout()->addWidget(voterChart);
 
+    voterFocusChart = new SingleVoterIdeologyWidget(this);
+    ui->voterFocusWidget->setLayout(new QVBoxLayout());
+    ui->voterFocusWidget->layout()->addWidget(voterFocusChart);
+
+    connect(voterModel, &VoterModel::voterAdded, voterChart, &VoterIdeologyChartWidget::updateChart);
+    connect(voterModel, &VoterModel::voterUpdated, voterChart, &VoterIdeologyChartWidget::updateChart);
+    connect(voterModel, &VoterModel::voterDeleted, voterChart, &VoterIdeologyChartWidget::updateChart);
+
+    connect(partyModel, &PartyModel::dataChangedExternally, partyChart, &PartyChartWidget::onDataChanged);
 
     setupButtonConnections();
 }
@@ -180,6 +184,16 @@ void MainWindow::setupButtonConnections() {
         //partyModel->recalculatePopularityFromVoters(voterModel);
     });
 
+    connect(ui->voterTableView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, [this](const QItemSelection &selected, const QItemSelection &) {
+        if (selected.indexes().isEmpty()) return;
+
+        QModelIndex index = selected.indexes().first();
+        int sourceRow = voterProxyModel->mapToSource(index).row();
+        const Voter& voter = voterModel->getVoterAt(sourceRow);
+        voterFocusChart->showVoter(voter);
+    });
+
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::resetDatabase);
 }
 
@@ -200,6 +214,13 @@ void MainWindow::resetDatabase() {
     QSqlQuery clear(db);
     if (!clear.exec("DELETE FROM voters"))
         qWarning() << "[Reset] Failed to clear voters:" << clear.lastError().text();
+
+    QSqlQuery resetVotersSeq(db);
+    resetVotersSeq.exec("DELETE FROM sqlite_sequence WHERE name='voters'");
+
+    QSqlQuery resetPartiesSeq(db);
+    resetPartiesSeq.exec("DELETE FROM sqlite_sequence WHERE name='parties'");
+
     if (!clear.exec("DELETE FROM parties"))
         qWarning() << "[Reset] Failed to clear parties:" << clear.lastError().text();
 
@@ -215,6 +236,8 @@ void MainWindow::resetDatabase() {
         partyMap.insert(name, id);
     }
 
+    voterModel->setPartyModel(partyModel);
+
     voterModel->ensureVotersPopulated(db, partyMap);
     voterModel->reloadData();
     //partyModel->recalculatePopularityFromVoters(voterModel);
@@ -222,5 +245,26 @@ void MainWindow::resetDatabase() {
 
 MainWindow::~MainWindow()
 {
+    // Disconnect any remaining signals that might trigger DB usage
+    disconnect(voterModel, nullptr, nullptr, nullptr);
+    disconnect(partyModel, nullptr, nullptr, nullptr);
+
+    // Delete UI first to ensure any widgets using models are gone
     delete ui;
+
+    // Delete dependent widgets/models BEFORE closing DB
+    delete voterFocusChart;
+    delete voterChart;
+    delete partyChart;
+    delete voterProxyModel;
+
+    delete voterModel;
+    delete partyModel;
+
+    // Now safely close and remove the DB connection
+    if (QSqlDatabase::contains("main_connection")) {
+        QSqlDatabase db = QSqlDatabase::database("main_connection");
+        db.close();
+        QSqlDatabase::removeDatabase("main_connection");
+    }
 }

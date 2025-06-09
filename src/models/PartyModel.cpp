@@ -170,11 +170,11 @@ bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
     if (countQuery.next() && countQuery.value(0).toInt() == 0) {
         QSqlQuery insert(db);
         QStringList insertStmts = {
-            "INSERT INTO parties (name, ideology) VALUES ('Unity Party', 'Centrist')",
-            "INSERT INTO parties (name, ideology) VALUES ('Green Force', 'Environmentalism')",
-            "INSERT INTO parties (name, ideology) VALUES ('Workers Union', 'Socialism')",
-            "INSERT INTO parties (name, ideology) VALUES ('Liberty League', 'Liberalism')",
-            "INSERT INTO parties (name, ideology) VALUES ('Tradition Front', 'Conservatism')"
+            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Unity Party', 'Centrist', 0, 0)",
+            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Green Force', 'Environmentalism', -50, -50)",
+            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Workers Union', 'Socialism', -80, 40)",
+            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Liberty League', 'Liberalism', 60, -30)",
+            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Tradition Front', 'Conservatism', 70, 60)"
         };
 
         for (const QString& stmt : insertStmts) {

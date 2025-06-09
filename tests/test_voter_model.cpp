@@ -25,7 +25,7 @@ struct ScopedFileRemover {
 TEST_CASE("VoterModel basic add/load", "[voter]") {
     const QString connName = "test_voter_connection";
     const QString dbPath = "test_voter.sqlite";
-    ScopedFileRemover cleanup(dbPath);
+    //ScopedFileRemover cleanup(dbPath);
 
     qDebug() << "[TEST] Start test for connection:" << connName;
 
@@ -63,7 +63,7 @@ TEST_CASE("VoterModel basic add/load", "[voter]") {
             REQUIRE(model->ensureVotersPopulated(db, nameToId) == true);
         }
 
-        delete model;
+        //delete model;
     }
-    QSqlDatabase::removeDatabase(connName);
+    //QSqlDatabase::removeDatabase(connName);
 }
