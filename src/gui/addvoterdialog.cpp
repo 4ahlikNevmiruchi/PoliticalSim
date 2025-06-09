@@ -31,7 +31,8 @@ AddVoterDialog::~AddVoterDialog() {
 Voter AddVoterDialog::getVoter() const {
     Voter v;
     v.name = ui->nameEdit->text();
-    v.ideology = ui->ideologyEdit->text();
+    v.ideologyId = ui->ideologyComboBox->currentData().toInt();
+    v.ideology = ui->ideologyComboBox->currentText();  // for display
     v.ideologyX = ideologyX();
     v.ideologyY = ideologyY();
     v.partyId = ui->partyComboBox->currentData().toInt();
@@ -41,12 +42,18 @@ Voter AddVoterDialog::getVoter() const {
 void AddVoterDialog::setVoter(const Voter &voter) {
     m_voterId = voter.id;
     ui->nameEdit->setText(voter.name);
-    ui->ideologyEdit->setText(voter.ideology);
     setIdeologyX(voter.ideologyX);
     setIdeologyY(voter.ideologyY);
-    int index = ui->partyComboBox->findData(voter.partyId);
-    if (index != -1)
-        ui->partyComboBox->setCurrentIndex(index);
+
+    // Set ideology combo from id
+    int ideologyIndex = ui->ideologyComboBox->findData(voter.ideologyId);
+    if (ideologyIndex != -1)
+        ui->ideologyComboBox->setCurrentIndex(ideologyIndex);
+
+    // Set party combo
+    int partyIndex = ui->partyComboBox->findData(voter.partyId);
+    if (partyIndex != -1)
+        ui->partyComboBox->setCurrentIndex(partyIndex);
 }
 
 void AddVoterDialog::setPartyOptions(const QVector<Party>& parties) {
@@ -72,4 +79,15 @@ void AddVoterDialog::setIdeologyX(int x) {
 
 void AddVoterDialog::setIdeologyY(int y) {
     ui->ideologyYSpinBox->setValue(y);
+}
+
+void AddVoterDialog::setIdeologyModel(const IdeologyModel* model) {
+    m_ideologyModel = model;
+    ui->ideologyComboBox->clear();
+
+    if (!model) return;
+
+    for (const Ideology& i : model->getIdeologies()) {
+        ui->ideologyComboBox->addItem(i.name, i.id);
+    }
 }

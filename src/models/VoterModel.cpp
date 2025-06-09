@@ -1,6 +1,8 @@
 #include "Voter.h"
 #include "VoterModel.h"
 #include "PartyModel.h"
+#include "IdeologyModel.h"
+
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -33,11 +35,12 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent, const QSt
     query.exec("CREATE TABLE IF NOT EXISTS voters ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                "name TEXT, "
-               "ideology TEXT, "
+               "ideologyId INTEGER,"
                "ideology_x INTEGER, "
                "ideology_y INTEGER, "
                "party_id INTEGER, "
-               "FOREIGN KEY(party_id) REFERENCES parties(id) ON DELETE SET NULL)");
+               "FOREIGN KEY(party_id) REFERENCES parties(id) ON DELETE SET NULL,"
+               "FOREIGN KEY(ideologyId) REFERENCES ideologies(id) ON DELETE SET NULL)");
 
     query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
                "FROM voters "
@@ -92,10 +95,12 @@ void VoterModel::addVoter(const Voter &voter) {
     }
 
     QSqlQuery query(db);
-    query.prepare("INSERT INTO voters (name, ideology, ideology_x, ideology_y, party_id) "
-                  "VALUES (:name, :ideology, :ix, :iy, :partyId)");
+    query.prepare(R"(
+    INSERT INTO voters (name, ideologyId, ideology_x, ideology_y, party_id)
+    VALUES (:name, :ideologyId, :ix, :iy, :partyId)
+    )");
     query.bindValue(":name", voter.name);
-    query.bindValue(":ideology", voter.ideology);
+    query.bindValue(":ideologyId", voter.ideologyId);
     query.bindValue(":ix", voter.ideologyX);
     query.bindValue(":iy", voter.ideologyY);
     query.bindValue(":partyId", voter.partyId);
@@ -119,12 +124,14 @@ void VoterModel::reloadData() {
     m_voters.clear();
 
     QSqlQuery query(QSqlDatabase::database(m_connectionName));
-    if (!query.exec("SELECT voters.id, voters.name, voters.ideology, "
-                    "voters.ideology_x, voters.ideology_y, "
-                    "voters.party_id, parties.name "
-
-                    "FROM voters "
-                    "LEFT JOIN parties ON voters.party_id = parties.id")) {
+    if (!query.exec(R"(
+    SELECT v.id, v.name, i.name AS ideologyName, v.ideologyId, v.ideology_x, v.ideology_y,
+           v.party_id, p.name AS partyName
+    FROM voters v
+    LEFT JOIN ideologies i ON v.ideologyId = i.id
+    LEFT JOIN parties p ON v.party_id = p.id
+    )"))
+     {
         qWarning() << "[VoterModel] reloadData failed:" << query.lastError().text();
         endResetModel();
         return;
@@ -134,11 +141,12 @@ void VoterModel::reloadData() {
         Voter v;
         v.id = query.value(0).toInt();
         v.name = query.value(1).toString();
+        v.ideologyId = query.value(3).toInt();
         v.ideology = query.value(2).toString();
-        v.ideologyX = query.value(3).toInt();
-        v.ideologyY = query.value(4).toInt();
-        v.partyId = query.value(5).isNull() ? -1 : query.value(5).toInt();
-        v.partyName = query.value(6).toString();
+        v.ideologyX = query.value(4).toInt();
+        v.ideologyY = query.value(5).toInt();
+        v.partyId = query.value(6).isNull() ? -1 : query.value(6).toInt();
+        v.partyName = query.value(7).toString();
 
         m_voters.append(v);
     }
@@ -158,78 +166,84 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int
         // Seed default voters only if none exist
         QList<Voter> defaults = {
             // Unity Party (~0, 0)
-            { -1, "John Doe", "Centrist", -1, "", 0, 0 },
-            { -1, "Emma Clark", "Centrist", -1, "", 2, -2 },
-            { -1, "Liam Brooks", "Centrist", -1, "", -3, 1 },
-            { -1, "Noah Wright", "Centrist", -1, "", 5, -3 },
-            { -1, "Olivia Lee", "Moderate", -1, "", 7, 0 },
-            { -1, "James Hall", "Centrist", -1, "", 0, 3 },
-            { -1, "Sophia Green", "Moderate", -1, "", 6, 2 },
-            { -1, "Lucas Adams", "Centrist", -1, "", -5, -2 },
-            { -1, "Mia Evans", "Centrist", -1, "", 3, 2 },
-            { -1, "Benjamin Scott", "Moderate", -1, "", 8, 4 },
-            { -1, "Ava Turner", "Centrist", -1, "", 0, 0 },
-            { -1, "Ethan Lewis", "Moderate", -1, "", 9, -2 },
-            { -1, "Isabella Young", "Centrist", -1, "", -1, 1 },
+            { -1, "John Doe", "", -1, -1, "", 0, 0 },
+            { -1, "Emma Clark", "", -1, -1, "", 2, -2 },
+            { -1, "Liam Brooks", "", -1, -1, "", -3, 1 },
+            { -1, "Noah Wright", "", -1, -1, "", 5, -3 },
+            { -1, "Olivia Lee", "", -1, -1, "", 7, 0 },
+            { -1, "James Hall", "", -1, -1, "", 0, 3 },
+            { -1, "Sophia Green", "", -1, -1, "", 6, 2 },
+            { -1, "Lucas Adams", "", -1, -1, "", -5, -2 },
+            { -1, "Mia Evans", "", -1, -1, "", 3, 2 },
+            { -1, "Benjamin Scott", "", -1, -1, "", 8, 4 },
+            { -1, "Ava Turner", "", -1, -1, "", 0, 0 },
+            { -1, "Ethan Lewis", "", -1, -1, "", 9, -2 },
+            { -1, "Isabella Young", "", -1, -1, "", -1, 1 },
 
             // Green Force (~-50, -50)
-            { -1, "Lily Cooper", "Environmentalism", -1, "", -48, -52 },
-            { -1, "Mason Reed", "Green Politics", -1, "", -55, -60 },
-            { -1, "Ella Walker", "Environmentalism", -1, "", -45, -48 },
-            { -1, "Logan Morris", "Ecologist", -1, "", -60, -55 },
-            { -1, "Chloe Hughes", "Sustainability", -1, "", -52, -45 },
-            { -1, "Elijah Rogers", "Environmentalism", -1, "", -49, -47 },
-            { -1, "Grace Foster", "Green Politics", -1, "", -55, -50 },
-            { -1, "Henry Bailey", "Environmentalism", -1, "", -46, -53 },
+            { -1, "Lily Cooper", "", -1, -1, "", -48, -52 },
+            { -1, "Mason Reed", "", -1, -1, "", -55, -60 },
+            { -1, "Ella Walker", "", -1, -1, "", -45, -48 },
+            { -1, "Logan Morris", "", -1, -1, "", -60, -55 },
+            { -1, "Chloe Hughes", "", -1, -1, "", -52, -45 },
+            { -1, "Elijah Rogers", "", -1, -1, "", -49, -47 },
+            { -1, "Grace Foster", "", -1, -1, "", -55, -50 },
+            { -1, "Henry Bailey", "", -1, -1, "", -46, -53 },
 
             // Workers Union (~-80, 40)
-            { -1, "Amelia Perez", "Socialist", -1, "", -82, 42 },
-            { -1, "Jack Kelly", "Leftist", -1, "", -85, 38 },
-            { -1, "Aria Rivera", "Socialist", -1, "", -78, 41 },
-            { -1, "Daniel Bennett", "Marxist", -1, "", -83, 45 },
-            { -1, "Harper Ramirez", "Social Democrat", -1, "", -75, 35 },
-            { -1, "Sebastian Bell", "Progressive", -1, "", -72, 43 },
-            { -1, "Victoria Morgan", "Socialist", -1, "", -84, 37 },
-            { -1, "Joseph Murphy", "Progressive", -1, "", -76, 42 },
-            { -1, "Emily Rivera", "Left-Wing", -1, "", -79, 46 },
-            { -1, "Ryan Ward", "Socialist", -1, "", -81, 39 },
+            { -1, "Amelia Perez", "", -1, -1, "", -82, 42 },
+            { -1, "Jack Kelly", "t", -1, -1, "", -85, 38 },
+            { -1, "Aria Rivera", "", -1, -1, "", -78, 41 },
+            { -1, "Daniel Bennett", "", -1, -1, "", -83, 45 },
+            { -1, "Harper Ramirez", "", -1, -1, "", -75, 35 },
+            { -1, "Sebastian Bell", "", -1, -1, "", -72, 43 },
+            { -1, "Victoria Morgan", "", -1, -1, "", -84, 37 },
+            { -1, "Joseph Murphy", "", -1, -1, "", -76, 42 },
+            { -1, "Emily Rivera", "", -1, -1, "", -79, 46 },
+            { -1, "Ryan Ward", "", -1, -1, "", -81, 39 },
 
             // Liberty League (~60, -30)
-            { -1, "Zoe Jenkins", "Liberal", -1, "", 62, -28 },
-            { -1, "David Gray", "Liberal", -1, "", 58, -30 },
-            { -1, "Scarlett Cox", "Libertarian", -1, "", 70, -45 },
-            { -1, "Leo James", "Liberal", -1, "", 60, -25 },
-            { -1, "Natalie Bailey", "Progressive", -1, "", 63, -33 },
-            { -1, "Aiden Diaz", "Liberal", -1, "", 65, -29 },
-            { -1, "Abigail Wood", "Libertarian", -1, "", 72, -40 },
-            { -1, "Samuel Patterson", "Social Liberal", -1, "", 61, -20 },
-            { -1, "Sofia Martinez", "Liberal", -1, "", 66, -32 },
-            { -1, "Owen Bell", "Liberal", -1, "", 64, -28 },
-            { -1, "Lucy Peterson", "Libertarian", -1, "", 69, -35 },
+            { -1, "Zoe Jenkins", "", -1, -1, "", 62, -28 },
+            { -1, "David Gray", "", -1, -1, "", 58, -30 },
+            { -1, "Scarlett Cox", "", -1, -1, "", 70, -45 },
+            { -1, "Leo James", "", -1, -1, "", 60, -25 },
+            { -1, "Natalie Bailey", "", -1, -1, "", 63, -33 },
+            { -1, "Aiden Diaz", "", -1, -1, "", 65, -29 },
+            { -1, "Abigail Wood", "", -1, -1, "", 72, -40 },
+            { -1, "Samuel Patterson", " ", -1, -1, "", 61, -20 },
+            { -1, "Sofia Martinez", "", -1, -1, "", 66, -32 },
+            { -1, "Owen Bell", "", -1, -1, "", 64, -28 },
+            { -1, "Lucy Peterson", "", -1, -1, "", 69, -35 },
 
             // Tradition Front (~70, 60)
-            { -1, "Michael Butler", "Conservative", -1, "", 68, 62 },
-            { -1, "Madison Price", "Conservative", -1, "", 72, 58 },
-            { -1, "Joshua Barnes", "Traditionalist", -1, "", 75, 65 },
-            { -1, "Evelyn Sanders", "Conservative", -1, "", 70, 60 },
-            { -1, "Luke Ross", "Right-Wing", -1, "", 73, 63 },
-            { -1, "Hannah Jenkins", "Nationalist", -1, "", 77, 66 },
-            { -1, "Carter Russell", "Conservative", -1, "", 70, 59 },
-            { -1, "Leah Coleman", "Right-Wing", -1, "", 74, 62 }
+            { -1, "Michael Butler", "", -1, -1, "", 68, 62 },
+            { -1, "Madison Price", "", -1, -1, "", 72, 58 },
+            { -1, "Joshua Barnes", "", -1, -1, "", 75, 65 },
+            { -1, "Evelyn Sanders", "", -1, -1, "", 70, 60 },
+            { -1, "Luke Ross", "", -1, -1, "", 73, 63 },
+            { -1, "Hannah Jenkins", "", -1, -1, "", 77, 66 },
+            { -1, "Carter Russell", "", -1, -1, "", 70, 59 },
+            { -1, "Leah Coleman", "", -1, -1, "", 74, 62 }
         };
 
         // Assign correct partyId based on ideology
         for (Voter& v : defaults) {
             v.partyId = findClosestPartyId(v.ideologyX, v.ideologyY);
             qDebug() << "Assigning voter to party ID:" << v.partyId;
+
+            v.ideologyId = ideologyModel->findClosestIdeologyId(v.ideologyX, v.ideologyY);
+            qDebug() << "Assigning voter to ideology ID:" << v.ideologyId;
         }
 
         for (const Voter& voter : defaults) {
             QSqlQuery insert(db);
-            insert.prepare("INSERT INTO voters (name, ideology, ideology_x, ideology_y, party_id) "
-                           "VALUES (:name, :ideology, :x, :y, :party_id)");
+            insert.prepare(R"(
+            INSERT INTO voters (name, ideologyId, ideology_x, ideology_y, party_id)
+            VALUES (:name, :ideologyId, :x, :y, :party_id)
+            )");
+
             insert.bindValue(":name", voter.name);
-            insert.bindValue(":ideology", voter.ideology);
+            insert.bindValue(":ideologyId", voter.ideologyId);
             insert.bindValue(":x", voter.ideologyX);
             insert.bindValue(":y", voter.ideologyY);
             insert.bindValue(":party_id",
@@ -331,17 +345,7 @@ int VoterModel::findClosestPartyId(int x, int y) const {
 void VoterModel::setPartyModel(const PartyModel* model) {
     partyModel = model;
 }
-/*
-void VoterModel::recalculateVoterPreferences() {
-    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
-    if (!db.isOpen() || !partyModel) return;
 
-    for (Voter& voter : m_voters) {
-        int closestParty = findClosestPartyId(voter.ideologyX, voter.ideologyY);
-        if (closestParty != voter.partyId) {
-            updateVoter(voter.id, {voter.id, voter.name, voter.ideology, closestParty, "", voter.ideologyX, voter.ideologyY});
-        }
-    }
-    reloadData();
+void VoterModel::setIdeologyModel(const IdeologyModel* model) {
+    ideologyModel = model;
 }
-*/

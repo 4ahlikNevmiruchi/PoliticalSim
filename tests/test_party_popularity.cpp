@@ -37,8 +37,8 @@ TEST_CASE("Party popularity is derived from voters", "[derived-popularity]") {
     QSqlDatabase db = QSqlDatabase::database(connName);
 
     // Add two parties
-    Party p1 { -1, "Alpha", "Lib" };
-    Party p2 { -1, "Beta", "Con" };
+    Party p1 { -1, "Alpha", -1 };
+    Party p2 { -1, "Beta", -1 };
     partyModel.addParty(p1);
     partyModel.addParty(p2);
     partyModel.reloadData();

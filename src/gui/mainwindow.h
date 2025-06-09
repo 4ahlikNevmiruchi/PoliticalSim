@@ -44,6 +44,7 @@ private:
 
     PartyModel* partyModel;
     VoterModel *voterModel;
+    IdeologyModel *ideologyModel;
     QSortFilterProxyModel* voterProxyModel;
     void setupButtonConnections();
     void resetDatabase();

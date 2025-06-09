@@ -6,6 +6,7 @@
 struct Voter {
     int id = -1;
     QString name;
+    int ideologyId = -1;
     QString ideology;
     int partyId = -1;
     QString partyName;
@@ -18,10 +19,11 @@ struct Voter {
         : name(name), ideology(ideology), partyId(partyId) {}
 
     Voter(int _id, const QString& _name, const QString& _ideology,
-          int _partyId, const QString& _partyName,
+          int _ideologyId, int _partyId, const QString& _partyName,
           int _ideologyX, int _ideologyY)
         : id(_id),
         name(_name),
+        ideologyId(_ideologyId),
         ideology(_ideology),
         partyId(_partyId),
         partyName(_partyName),

@@ -8,11 +8,13 @@
 #include <QVector>
 #include <QSqlDatabase>
 class VoterModel;
+class IdeologyModel;
 
 struct Party {
     int id = -1;
     QString name;
-    QString ideology;        //!< Descriptive ideology label
+    int ideologyId = -1;
+    QString ideology;
     int ideologyX = 0;       //!< Economic axis
     int ideologyY = 0;       //!< Social axis
     //double popularity;
@@ -88,10 +90,11 @@ public:
     void updateParty(int id, const Party &updatedParty);
     const QVector<Party>& getAllParties() const;
     Party getPartyAt(int row) const;
-    const VoterModel* voterModel = nullptr;
-    const PartyModel* partyModel = nullptr;
+    double calculatePopularity(const int partyId) const;
+
     void setVoterModel(VoterModel* model);
-    double calculatePopularity(int partyId) const;
+    void setIdeologyModel(const IdeologyModel* model);
+
 
 
     /**
@@ -109,6 +112,9 @@ private:
     QVector<Party> m_parties;
     QString m_connectionName;
     QString m_dbPath;
+
+    const IdeologyModel* ideologyModel = nullptr;
+    const VoterModel* voterModel = nullptr;
 };
 
 

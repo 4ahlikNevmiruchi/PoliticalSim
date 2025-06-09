@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "models/PartyModel.h"
+#include "models/IdeologyModel.h"
 
 namespace Ui {
 class AddPartyDialog;
@@ -25,9 +26,12 @@ public:
     void setIdeologyX(int x);
     void setIdeologyY(int y);
 
+    void setIdeologyModel(const IdeologyModel* model);
+
 private:
     Ui::AddPartyDialog *ui;
     int m_partyId = -1;
+    const IdeologyModel* m_ideologyModel = nullptr;
 };
 
 #endif // ADDPARTYDIALOG_H

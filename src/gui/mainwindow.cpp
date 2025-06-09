@@ -3,6 +3,7 @@
 #include "addpartydialog.h"
 #include "addvoterdialog.h"
 #include "models/PartyModel.h"
+#include "models/IdeologyModel.h"
 
 #include <QSqlQuery>
 #include <QSqlError>
@@ -17,9 +18,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     partyModel = new PartyModel("main_connection", this);
     voterModel = new VoterModel("main_connection", this);
+    ideologyModel = new IdeologyModel("main_connection", this);
 
     partyModel->setVoterModel(voterModel);
     voterModel->setPartyModel(partyModel);
+
+    voterModel->setIdeologyModel(ideologyModel);
+    partyModel->setIdeologyModel(ideologyModel);
 
     voterProxyModel = new QSortFilterProxyModel(this);
 
@@ -124,6 +129,7 @@ void MainWindow::setupButtonConnections() {
     connect(ui->addPartyButton, &QPushButton::clicked, this, [=]() {
         qDebug() << "[UI] Add Party clicked";
         AddPartyDialog dialog(this);
+        dialog.setIdeologyModel(ideologyModel);
         if (dialog.exec() == QDialog::Accepted) {
             partyModel->addParty(dialog.getParty());
         }
@@ -137,6 +143,8 @@ void MainWindow::setupButtonConnections() {
         Party party = partyModel->getPartyAt(index.row());
 
         AddPartyDialog dialog(this);
+        dialog.setParty(party);
+        dialog.setIdeologyModel(ideologyModel);
         dialog.setParty(party);
         if (dialog.exec() == QDialog::Accepted) {
             partyModel->updateParty(id, dialog.getParty());
@@ -154,6 +162,7 @@ void MainWindow::setupButtonConnections() {
     connect(ui->addVoterButton, &QPushButton::clicked, this, [=]() {
         qDebug() << "[UI] Add Voter clicked";
         AddVoterDialog dialog(this, partyModel);
+        dialog.setIdeologyModel(ideologyModel);
         if (dialog.exec() == QDialog::Accepted) {
             voterModel->addVoter(dialog.getVoter());
         }
@@ -168,6 +177,8 @@ void MainWindow::setupButtonConnections() {
         Voter voter = voterModel->getVoterAt(index.row());
 
         AddVoterDialog dialog(this, partyModel);
+        dialog.setIdeologyModel(ideologyModel);
+        dialog.setVoter(voter);
         dialog.setVoter(voter);
         if (dialog.exec() == QDialog::Accepted) {
             voterModel->updateVoter(id, dialog.getVoter());

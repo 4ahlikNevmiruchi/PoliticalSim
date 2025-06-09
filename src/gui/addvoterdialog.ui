@@ -40,24 +40,9 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="ideologyEdit">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="echoMode">
-         <enum>QLineEdit::EchoMode::Normal</enum>
-        </property>
-        <property name="cursorPosition">
-         <number>0</number>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-        </property>
+       <widget class="QComboBox" name="ideologyComboBox">
         <property name="placeholderText">
          <string>Ideology</string>
-        </property>
-        <property name="clearButtonEnabled">
-         <bool>false</bool>
         </property>
        </widget>
       </item>

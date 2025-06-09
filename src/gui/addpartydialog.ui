@@ -25,7 +25,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="ideologyEdit">
+       <widget class="QComboBox" name="ideologyComboBox">
         <property name="placeholderText">
          <string>Ideology</string>
         </property>

@@ -1,4 +1,5 @@
 #include "AddPartyDialog.h"
+#include "IdeologyModel.h"
 #include "ui_AddPartyDialog.h"
 
 #include <QDialog>
@@ -14,13 +15,16 @@ AddPartyDialog::~AddPartyDialog() {
 }
 
 Party AddPartyDialog::getParty() const {
+    int ideologyId = ui->ideologyComboBox->currentData().toInt();
+    QString ideologyName = ui->ideologyComboBox->currentText();
+
     return Party{
         m_partyId,
         ui->nameEdit->text(),
-        ui->ideologyEdit->text(),
+        ideologyId,
+        ideologyName,
         ui->ideologyXSpinBox->value(),
         ui->ideologyYSpinBox->value()
-        //ui->popularitySpin->value()
     };
 }
 
@@ -28,10 +32,14 @@ Party AddPartyDialog::getParty() const {
 void AddPartyDialog::setParty(const Party &party) {
     m_partyId = party.id;
     ui->nameEdit->setText(party.name);
-    ui->ideologyEdit->setText(party.ideology);
     ui->ideologyXSpinBox->setValue(party.ideologyX);
     ui->ideologyYSpinBox->setValue(party.ideologyY);
-    //ui->popularitySpin->setValue(party.popularity);
+
+    // Match ideologyId in the comboBox
+    int index = ui->ideologyComboBox->findData(party.ideologyId);
+    if (index != -1) {
+        ui->ideologyComboBox->setCurrentIndex(index);
+    }
 }
 
 int AddPartyDialog::getPartyId() const {
@@ -52,4 +60,15 @@ void AddPartyDialog::setIdeologyX(int x) {
 
 void AddPartyDialog::setIdeologyY(int y) {
     ui->ideologyYSpinBox->setValue(y);
+}
+
+void AddPartyDialog::setIdeologyModel(const IdeologyModel* model) {
+    m_ideologyModel = model;
+    ui->ideologyComboBox->clear();
+
+    if (!model) return;
+
+    for (const Ideology& i : model->getIdeologies()) {
+        ui->ideologyComboBox->addItem(i.name, i.id); // text, user data
+    }
 }

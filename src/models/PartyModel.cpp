@@ -1,6 +1,7 @@
 #include "PartyModel.h"
 #include "Voter.h"
 #include "VoterModel.h"
+#include "IdeologyModel.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -38,9 +39,10 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
     query.exec("CREATE TABLE IF NOT EXISTS parties ("
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 "name TEXT, "
-                "ideology TEXT, "
+                "ideology_id INTEGER,"
                 "ideology_x INTEGER, "
-                "ideology_y INTEGER)");
+                "ideology_y INTEGER,"
+                "FOREIGN KEY(ideology_id) REFERENCES ideologies(id) ON DELETE SET NULL)");
 
     if (seedDefaults)
         ensurePartiesPopulated(db);
@@ -50,8 +52,8 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
         m_parties.append(Party{
             query.value(0).toInt(),         // id
             query.value(1).toString(),      // name
-            query.value(2).toString(),      // ideology
-            query.value(3).toInt(),
+            query.value(2).toInt(),      // ideology
+            query.value(3).toString(),
             query.value(4).toInt()
         });
     }
@@ -113,10 +115,10 @@ void PartyModel::addParty(const Party &party) {
     }
 
     QSqlQuery query(db);
-    query.prepare("INSERT INTO parties (name, ideology, ideology_x, ideology_y) "
-                  "VALUES (:name, :ideology, :ix, :iy)");
+    query.prepare("INSERT INTO parties (name, ideology_id, ideology_x, ideology_y) "
+                  "VALUES (:name, :ideology_id, :ix, :iy)");
     query.bindValue(":name", party.name);
-    query.bindValue(":ideology", party.ideology);
+    query.bindValue(":ideology_id", party.ideologyId);
     query.bindValue(":ix", party.ideologyX);
     query.bindValue(":iy", party.ideologyY);
 
@@ -142,7 +144,7 @@ void PartyModel::reloadData() {
     }
 
     QSqlQuery query(db);
-    if (!query.exec("SELECT id, name, ideology, ideology_x, ideology_y FROM parties")) {
+    if (!query.exec("SELECT id, name, ideology, ideologyId, ideology_x, ideology_y FROM parties")) {
         qWarning() << "[PartyModel] reloadData failed:" << query.lastError().text();
         endResetModel();
         return;
@@ -152,10 +154,10 @@ void PartyModel::reloadData() {
         m_parties.append(Party{
             query.value(0).toInt(),                     // id
             query.value(1).toString(),                  // name
-            query.value(2).toString(),                  // ideology
+            query.value(2).toInt(),                     // ideologyId
+            query.value(3).toString(),                  // ideology
             query.value(3).toInt(),                     // ideologyX
-            query.value(4).toInt()                      // ideologyY
-            //query.value(3).toDouble()                 // popularity
+            query.value(5).toInt()                      // ideologyY
         });
     }
 
@@ -172,11 +174,11 @@ bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
     if (countQuery.next() && countQuery.value(0).toInt() == 0) {
         QSqlQuery insert(db);
         QStringList insertStmts = {
-            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Unity Party', 'Centrist', 0, 0)",
-            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Green Force', 'Environmentalism', -50, -50)",
-            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Workers Union', 'Socialism', -80, 40)",
-            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Liberty League', 'Liberalism', 60, -30)",
-            "INSERT INTO parties (name, ideology, ideology_x, ideology_y) VALUES ('Tradition Front', 'Conservatism', 70, 60)"
+            "INSERT INTO parties (name, ideology_id, ideology_x, ideology_y) VALUES ('Unity Party', 1, 0, 0)",
+            "INSERT INTO parties (name, ideology_id, ideology_x, ideology_y) VALUES ('Green Force', 2, -50, -50)",
+            "INSERT INTO parties (name, ideology_id, ideology_x, ideology_y) VALUES ('Workers Union', 3, -80, 40)",
+            "INSERT INTO parties (name, ideology_id, ideology_x, ideology_y) VALUES ('Liberty League', 4, 60, -30)",
+            "INSERT INTO parties (name, ideology_id, ideology_x, ideology_y) VALUES ('Tradition Front', 5, 70, 60)"
         };
 
         for (const QString& stmt : insertStmts) {
@@ -218,10 +220,10 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
     }
 
     QSqlQuery query(db);
-    query.prepare("UPDATE parties SET name = :name, ideology = :ideology, "
+    query.prepare("UPDATE parties SET name = :name, ideology_id = :ideology_id, "
                   "ideology_x = :ix, ideology_y = :iy WHERE id = :id");
     query.bindValue(":name", updatedParty.name);
-    query.bindValue(":ideology", updatedParty.ideology);
+    query.bindValue(":ideology_id", updatedParty.ideologyId);
     query.bindValue(":ix", updatedParty.ideologyX);
     query.bindValue(":iy", updatedParty.ideologyY);
     query.bindValue(":id", id);
@@ -239,31 +241,6 @@ Party PartyModel::getPartyAt(int row) const {
     if (row < 0 || row >= m_parties.size()) return {};
     return m_parties[row];
 }
-
-/*void PartyModel::recalculatePopularityFromVoters(const VoterModel* voterModel) {
-    if (!voterModel) return;
-
-    QMap<int, int> voteCounts;
-    int totalVotes = 0;
-
-    for (int i = 0; i < voterModel->rowCount(); ++i) {
-        QModelIndex index = voterModel->index(i, 0);
-        int partyId = voterModel->data(index, Qt::UserRole).toInt();
-        if (partyId != -1) {
-            voteCounts[partyId]++;
-            totalVotes++;
-        }
-    }
-
-    for (Party& party : m_parties) {
-        party.popularity = (totalVotes > 0)
-        ? (voteCounts.value(party.id, 0) * 100.0 / totalVotes)
-        : 0.0;
-    }
-
-    emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-    emit dataChangedExternally();
-}*/
 
 double PartyModel::calculatePopularity(int partyId) const {
     if (!voterModel) return 0.0;
@@ -289,3 +266,8 @@ void PartyModel::recalculatePopularityFromVoters() {
     // Also notify external listeners (e.g., the chart widget) of data change
     emit dataChangedExternally();
 }
+
+void PartyModel::setIdeologyModel(const IdeologyModel* model) {
+    ideologyModel = model;
+}
+

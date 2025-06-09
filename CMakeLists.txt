@@ -59,6 +59,9 @@ add_executable(PoliticalSim
 
     src/widgets/SingleVoterIdeologyWidget.h
     src/widgets/SingleVoterIdeologyWidget.cpp
+
+    src/models/IdeologyModel.h
+    src/models/IdeologyModel.cpp
 )
 
 # Includes for GUI
@@ -89,10 +92,12 @@ add_executable(UnitTests
     src/models/PartyModel.cpp
     src/models/PartyModel.h
 
-
     src/models/Voter.h
     src/models/VoterModel.cpp
     src/models/VoterModel.h
+
+    src/models/IdeologyModel.h
+    src/models/IdeologyModel.cpp
 )
 
 # Includes for UnitTests (including Catch2)

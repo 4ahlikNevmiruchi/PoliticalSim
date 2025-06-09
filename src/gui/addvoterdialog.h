@@ -4,6 +4,7 @@
 #include <QDialog>
 #include "models/VoterModel.h"
 #include "models/PartyModel.h"
+#include "models/IdeologyModel.h"
 
 namespace Ui {
 class AddVoterDialog;
@@ -27,11 +28,14 @@ public:
     void setIdeologyX(int x);
     void setIdeologyY(int y);
 
+    void setIdeologyModel(const IdeologyModel* model);
+
 
 private:
     Ui::AddVoterDialog *ui;
     QVector<Party> partyList;
     PartyModel* m_partyModel = nullptr;
+    const IdeologyModel* m_ideologyModel = nullptr;
     int m_voterId = -1;
 
 };

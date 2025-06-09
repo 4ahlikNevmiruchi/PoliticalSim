@@ -6,6 +6,7 @@
 #include <QSqlDatabase>
 #include "Voter.h"
 class PartyModel;
+class IdeologyModel;
 
 /**
  * @brief Manages the list of voters (citizens) and their affiliations.
@@ -73,13 +74,16 @@ public:
     Voter getVoterAt(int row) const;
     int findClosestPartyId(int x, int y) const;
 
-    void setPartyModel(const PartyModel* model);  // Needed for access
+    void setPartyModel(const PartyModel* model);
+    void setIdeologyModel(const IdeologyModel* model);
 
 
 private:
     QString m_connectionName;
     QVector<Voter> m_voters;
+
     const PartyModel* partyModel = nullptr;
+    const IdeologyModel* ideologyModel = nullptr;
 };
 
 #endif // VOTERMODEL_H
