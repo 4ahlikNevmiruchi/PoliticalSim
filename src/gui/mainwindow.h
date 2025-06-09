@@ -5,6 +5,8 @@
 
 #include "models/PartyModel.h"
 #include "models/VoterModel.h"
+#include "widgets/VoterIdeologyChartWidget.h"
+#include "widgets/PartyChartWidget.h"
 
 #include <QSortFilterProxyModel>
 
@@ -43,6 +45,9 @@ private:
     QSortFilterProxyModel* voterProxyModel;
     void setupButtonConnections();
     void resetDatabase();
+
+    VoterIdeologyChartWidget* voterChart;
+    PartyChartWidget *partyChart;
 };
 
 #endif // MAINWINDOW_H

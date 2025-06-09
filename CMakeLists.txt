@@ -46,10 +46,16 @@ add_executable(PoliticalSim
 
     src/models/VoterModel.h
     src/models/VoterModel.cpp
-    src/gui/addvoterdialog.h src/gui/addvoterdialog.cpp src/gui/addvoterdialog.ui
+
+    src/gui/AddVoterDialog.h
+    src/gui/AddVoterDialog.cpp
+    src/gui/AddVoterDialog.ui
 
     src/widgets/PartyChartWidget.cpp
     src/widgets/PartyChartWidget.h
+
+    src/widgets/VoterIdeologyChartWidget.h
+    src/widgets/VoterIdeologyChartWidget.cpp
 )
 
 # Includes for GUI

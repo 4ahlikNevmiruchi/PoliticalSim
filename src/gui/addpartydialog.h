@@ -19,6 +19,12 @@ public:
     void setParty(const Party &party);
     int getPartyId() const;
 
+    int ideologyX() const;
+    int ideologyY() const;
+
+    void setIdeologyX(int x);
+    void setIdeologyY(int y);
+
 private:
     Ui::AddPartyDialog *ui;
     int m_partyId = -1;

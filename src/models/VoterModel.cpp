@@ -33,8 +33,10 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent, const QSt
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                "name TEXT, "
                "ideology TEXT, "
+               "ideology_x INTEGER, "
+               "ideology_y INTEGER, "
                "party_id INTEGER, "
-               "FOREIGN KEY (party_id) REFERENCES parties(id) ON DELETE SET NULL)");
+               "FOREIGN KEY(party_id) REFERENCES parties(id) ON DELETE SET NULL)");
 
     query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
                "FROM voters "
@@ -89,10 +91,13 @@ void VoterModel::addVoter(const Voter &voter) {
     }
 
     QSqlQuery query(db);
-    query.prepare("INSERT INTO voters (name, ideology, party_id) "
-                  "VALUES (:name, :ideology, :party_id)");
+    query.prepare("INSERT INTO voters (name, ideology, ideology_x, ideology_y, party_id) "
+                  "VALUES (:name, :ideology, :ix, :iy, :partyId)");
     query.bindValue(":name", voter.name);
     query.bindValue(":ideology", voter.ideology);
+    query.bindValue(":ix", voter.ideologyX);
+    query.bindValue(":iy", voter.ideologyY);
+    query.bindValue(":partyId", voter.partyId);
     if (voter.partyId != -1) {
         query.bindValue(":party_id", voter.partyId);
     } else {
@@ -113,7 +118,10 @@ void VoterModel::reloadData() {
     m_voters.clear();
 
     QSqlQuery query(QSqlDatabase::database(m_connectionName));
-    if (!query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
+    if (!query.exec("SELECT voters.id, voters.name, voters.ideology, "
+                    "voters.ideology_x, voters.ideology_y, "
+                    "voters.party_id, parties.name "
+
                     "FROM voters "
                     "LEFT JOIN parties ON voters.party_id = parties.id")) {
         qWarning() << "[VoterModel] reloadData failed:" << query.lastError().text();
@@ -126,8 +134,11 @@ void VoterModel::reloadData() {
         v.id = query.value(0).toInt();
         v.name = query.value(1).toString();
         v.ideology = query.value(2).toString();
-        v.partyId = query.value(3).isNull() ? -1 : query.value(3).toInt();
-        v.partyName = query.value(4).toString();
+        v.ideologyX = query.value(3).toInt();
+        v.ideologyY = query.value(4).toInt();
+        v.partyId = query.value(5).isNull() ? -1 : query.value(5).toInt();
+        v.partyName = query.value(6).toString();
+
         m_voters.append(v);
     }
 

@@ -36,10 +36,11 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
 
     QSqlQuery query(db);
     query.exec("CREATE TABLE IF NOT EXISTS parties ("
-               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-               "name TEXT, "
-               "ideology TEXT)");
-               //"popularity REAL)");
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                "name TEXT, "
+                "ideology TEXT, "
+                "ideology_x INTEGER, "
+                "ideology_y INTEGER)");
 
     if (seedDefaults)
         ensurePartiesPopulated(db);
@@ -50,7 +51,8 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
             query.value(0).toInt(),         // id
             query.value(1).toString(),      // name
             query.value(2).toString(),      // ideology
-            //query.value(3).toDouble()       // popularity
+            query.value(3).toInt(),
+            query.value(4).toInt()
         });
     }
     qDebug() << "[PartyModel] Connection name: " << m_connectionName;
@@ -111,11 +113,12 @@ void PartyModel::addParty(const Party &party) {
     }
 
     QSqlQuery query(db);
-    query.prepare("INSERT INTO parties (name, ideology) "
-                  "VALUES (:name, :ideology)");
+    query.prepare("INSERT INTO parties (name, ideology, ideology_x, ideology_y) "
+                  "VALUES (:name, :ideology, :ix, :iy)");
     query.bindValue(":name", party.name);
     query.bindValue(":ideology", party.ideology);
-    //query.bindValue(":popularity", party.popularity);
+    query.bindValue(":ix", party.ideologyX);
+    query.bindValue(":iy", party.ideologyY);
 
     if (!query.exec()) {
         qWarning() << "[PartyModel] Insert failed:" << query.lastError().text();
@@ -213,10 +216,12 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
     }
 
     QSqlQuery query(db);
-    query.prepare("UPDATE parties SET name = :name, ideology = :ideology WHERE id = :id");
+    query.prepare("UPDATE parties SET name = :name, ideology = :ideology, "
+                  "ideology_x = :ix, ideology_y = :iy WHERE id = :id");
     query.bindValue(":name", updatedParty.name);
     query.bindValue(":ideology", updatedParty.ideology);
-    //query.bindValue(":popularity", updatedParty.popularity);
+    query.bindValue(":ix", updatedParty.ideologyX);
+    query.bindValue(":iy", updatedParty.ideologyY);
     query.bindValue(":id", id);
 
     if (!query.exec()) {

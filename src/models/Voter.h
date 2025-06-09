@@ -9,6 +9,8 @@ struct Voter {
     QString ideology;
     int partyId = -1;
     QString partyName;
+    int ideologyX = 0;
+    int ideologyY = 0;
 
     Voter() = default;
 

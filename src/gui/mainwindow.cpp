@@ -2,15 +2,12 @@
 #include "ui_MainWindow.h"
 #include "addpartydialog.h"
 #include "addvoterdialog.h"
-#include "widgets/PartyChartWidget.h"
 #include "models/PartyModel.h"
 
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
 #include <QDebug>
-
-PartyChartWidget *partyChart;
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -42,6 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(voterModel, &VoterModel::voterAdded, voterModel, &VoterModel::reloadData);
     connect(voterModel, &VoterModel::voterUpdated, voterModel, &VoterModel::reloadData);
     connect(voterModel, &VoterModel::voterDeleted, voterModel, &VoterModel::reloadData);
+
+    connect(voterModel, &VoterModel::voterAdded, voterChart, &VoterIdeologyChartWidget::updateChart);
+    connect(voterModel, &VoterModel::voterUpdated, voterChart, &VoterIdeologyChartWidget::updateChart);
+    connect(voterModel, &VoterModel::voterDeleted, voterChart, &VoterIdeologyChartWidget::updateChart);
 
     // Recalculate chart on data change
     connect(voterModel, &VoterModel::voterAdded, partyModel, [&] {
@@ -95,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent)
         voterProxyModel->setFilterFixedString(text);
     });
 
-    // 🔄 Real-Time Chart Setup
+    //Charts Setup
     partyChart = new PartyChartWidget(partyModel, this);
     if (!ui->chartContainer->layout()) {
         auto *layout = new QVBoxLayout(ui->chartContainer);
@@ -105,8 +106,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->chartContainer->layout()->addWidget(partyChart);
     partyChart->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // Optional: Remove minSize if it causes clipping
     ui->chartContainer->setMinimumSize(QSize(0, 0));
+
+    voterChart = new VoterIdeologyChartWidget(this);
+    voterChart->setVoterModel(voterModel);
+    ui->chartContainer->layout()->addWidget(voterChart);
+
 
     setupButtonConnections();
 }

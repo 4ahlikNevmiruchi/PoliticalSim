@@ -19,8 +19,13 @@ public:
 
     Voter getVoter() const;
     void setVoter(const Voter &voter);
-
     void setPartyOptions(const QVector<Party>& parties);
+
+    int ideologyX() const;
+    int ideologyY() const;
+
+    void setIdeologyX(int x);
+    void setIdeologyY(int y);
 
 
 private:

@@ -12,7 +12,9 @@
 struct Party {
     int id = -1;
     QString name;
-    QString ideology;
+    QString ideology;        //!< Descriptive ideology label
+    int ideologyX = 0;       //!< Economic axis
+    int ideologyY = 0;       //!< Social axis
     //double popularity;
 };
 /**
