@@ -73,6 +73,8 @@ add_executable(UnitTests
     tests/test_voter_model.cpp
     tests/test_party_popularity.cpp
 
+    src/utilities/ScopedFileRemover.h
+
     src/models/PartyModel.cpp
     src/models/VoterModel.cpp
 

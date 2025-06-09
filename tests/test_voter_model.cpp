@@ -7,10 +7,25 @@
 
 #include "models/VoterModel.h"
 
+#include "utilities/ScopedFileRemover.h"
+
+
+/*
+struct ScopedFileRemover {
+    QString path;
+    ScopedFileRemover(const QString& filePath) : path(filePath) {}
+    ~ScopedFileRemover() {
+        if (QFile::exists(path)) {
+            QFile::remove(path);
+        }
+    }
+};
+*/
+
 TEST_CASE("VoterModel basic add/load", "[voter]") {
     const QString connName = "test_voter_connection";
     const QString dbPath = "test_voter.sqlite";
-    QFile::remove(dbPath);
+    ScopedFileRemover cleanup(dbPath);
 
     qDebug() << "[TEST] Start test for connection:" << connName;
 
@@ -50,7 +65,5 @@ TEST_CASE("VoterModel basic add/load", "[voter]") {
 
         delete model;
     }
-
-    qDebug() << "[TEST] Removing connection";
     QSqlDatabase::removeDatabase(connName);
 }

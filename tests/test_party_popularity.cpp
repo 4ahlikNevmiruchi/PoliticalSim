@@ -4,19 +4,29 @@
 #include <QSqlDatabase>
 #include <QFile>
 #include <QMap>
+
 #include "models/PartyModel.h"
 #include "models/VoterModel.h"
+
+#include "utilities/ScopedFileRemover.h"
+
+
+/*
+struct ScopedFileRemover {
+    QString path;
+    ScopedFileRemover(const QString& filePath) : path(filePath) {}
+    ~ScopedFileRemover() {
+        if (QFile::exists(path)) {
+            QFile::remove(path);
+        }
+    }
+};
+*/
 
 TEST_CASE("Party popularity is derived from voters", "[derived-popularity]") {
     const QString connName = "test_popularity_connection";
     const QString dbPath = "test_popularity.sqlite";
-
-    // Cleanup
-    if (QSqlDatabase::contains(connName)) {
-        QSqlDatabase::database(connName).close();
-        QSqlDatabase::removeDatabase(connName);
-    }
-    QFile::remove(dbPath);
+    ScopedFileRemover cleanup(dbPath);
 
     // Init models
     PartyModel partyModel(connName, nullptr, false, dbPath);
@@ -65,4 +75,6 @@ TEST_CASE("Party popularity is derived from voters", "[derived-popularity]") {
 
     REQUIRE(alphaPopularity2 == Catch::Approx(75.0));
     REQUIRE(betaPopularity2 == Catch::Approx(25.0));
+
+    QSqlDatabase::removeDatabase(connName);
 }
