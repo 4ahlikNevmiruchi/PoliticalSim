@@ -45,7 +45,7 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
     if (seedDefaults)
         ensurePartiesPopulated(db);
 
-    query.exec("SELECT id, name, ideology, FROM parties");
+    query.exec("SELECT id, name, ideology, ideology_x, ideology_y FROM parties");
     while (query.next()) {
         m_parties.append(Party{
             query.value(0).toInt(),         // id
@@ -142,7 +142,7 @@ void PartyModel::reloadData() {
     }
 
     QSqlQuery query(db);
-    if (!query.exec("SELECT id, name, ideology FROM parties")) {
+    if (!query.exec("SELECT id, name, ideology, ideology_x, ideology_y FROM parties")) {
         qWarning() << "[PartyModel] reloadData failed:" << query.lastError().text();
         endResetModel();
         return;
@@ -153,7 +153,9 @@ void PartyModel::reloadData() {
             query.value(0).toInt(),                     // id
             query.value(1).toString(),                  // name
             query.value(2).toString(),                  // ideology
-            //query.value(3).toDouble()                   // popularity
+            query.value(3).toInt(),                     // ideologyX
+            query.value(4).toInt()                      // ideologyY
+            //query.value(3).toDouble()                 // popularity
         });
     }
 

@@ -228,6 +228,8 @@ void MainWindow::resetDatabase() {
     partyModel->reloadData();
     //partyModel->recalculatePopularityFromVoters(voterModel);
 
+    voterModel->setPartyModel(partyModel);
+
     QMap<QString, int> partyMap;
     for (int i = 0; i < partyModel->rowCount(); ++i) {
         QModelIndex index = partyModel->index(i, 0);
@@ -235,8 +237,6 @@ void MainWindow::resetDatabase() {
         int id = partyModel->data(index, Qt::UserRole).toInt();
         partyMap.insert(name, id);
     }
-
-    voterModel->setPartyModel(partyModel);
 
     voterModel->ensureVotersPopulated(db, partyMap);
     voterModel->reloadData();

@@ -221,6 +221,7 @@ bool VoterModel::ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int
         // Assign correct partyId based on ideology
         for (Voter& v : defaults) {
             v.partyId = findClosestPartyId(v.ideologyX, v.ideologyY);
+            qDebug() << "Assigning voter to party ID:" << v.partyId;
         }
 
         for (const Voter& voter : defaults) {
@@ -305,7 +306,10 @@ int VoterModel::totalVoters() const {
 }
 
 int VoterModel::findClosestPartyId(int x, int y) const {
-    if (!partyModel) return -1;
+    if (!partyModel) {
+        qWarning() << "[findClosestPartyId] partyModel not set!";
+        return -1;
+    }
 
     int closestId = -1;
     double minDistance = std::numeric_limits<double>::max();
