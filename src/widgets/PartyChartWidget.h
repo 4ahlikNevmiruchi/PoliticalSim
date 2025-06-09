@@ -20,7 +20,7 @@ private:
     void setupChart();
     void updateChart();
 
-private slots:
+public slots:
     void onDataChanged();
 };
 

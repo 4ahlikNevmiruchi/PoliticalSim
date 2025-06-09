@@ -18,7 +18,7 @@ Party AddPartyDialog::getParty() const {
         m_partyId,
         ui->nameEdit->text(),
         ui->ideologyEdit->text(),
-        ui->popularitySpin->value()
+        //ui->popularitySpin->value()
     };
 }
 
@@ -27,7 +27,7 @@ void AddPartyDialog::setParty(const Party &party) {
     m_partyId = party.id;
     ui->nameEdit->setText(party.name);
     ui->ideologyEdit->setText(party.ideology);
-    ui->popularitySpin->setValue(party.popularity);
+    //ui->popularitySpin->setValue(party.popularity);
 }
 
 int AddPartyDialog::getPartyId() const {

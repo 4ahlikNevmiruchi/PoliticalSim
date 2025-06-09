@@ -1,6 +1,9 @@
 #ifndef PARTYMODEL_H
 #define PARTYMODEL_H
 
+#include "Voter.h"
+#include "VoterModel.h"
+
 #include <QAbstractTableModel>
 #include <QString>
 #include <QVector>
@@ -10,7 +13,7 @@ struct Party {
     int id = -1;
     QString name;
     QString ideology;
-    double popularity;
+    //double popularity;
 };
 /**
  * @brief Manages a table model of political parties, using an SQLite database.
@@ -27,11 +30,10 @@ signals:
     void partyUpdated();
     void partyDeleted();
     void dataChangedExternally();
+    void popularityRecalculated();
 
 
 public:
-    QString m_connectionName;
-
     explicit PartyModel(const QString &connectionName,
                         QObject *parent = nullptr,
                         bool seedDefaults = true,
@@ -58,9 +60,19 @@ public:
 
     Party getPartyAt(int row) const;
 
+    const VoterModel* voterModel = nullptr;
+    void setVoterModel(VoterModel* model);
+    double calculatePopularity(int partyId) const;
+
+
+/*public slots:
+    void recalculatePopularityFromVoters(const VoterModel* voterModel);*/
+
 
 private:
     QVector<Party> m_parties;
+    QString m_connectionName;
+    QString m_dbPath;
 };
 
 

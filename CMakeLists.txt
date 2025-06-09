@@ -71,6 +71,7 @@ add_executable(UnitTests
     tests/test_party_model.cpp
     tests/test_party_db.cpp
     tests/test_voter_model.cpp
+    tests/test_party_popularity.cpp
 
     src/models/PartyModel.cpp
     src/models/VoterModel.cpp

@@ -29,6 +29,9 @@ public:
     void deleteVoterById(int voterId);
     void updateVoter(int id, const Voter &updatedVoter);
 
+    QMap<int, int> countVotersPerParty() const;
+    int totalVoters() const;
+
     Voter getVoterAt(int row) const;
 
 

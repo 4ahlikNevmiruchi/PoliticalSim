@@ -6,7 +6,6 @@
 #include <QFile>
 
 #include "models/VoterModel.h"
-#include "models/PartyModel.h"
 
 TEST_CASE("VoterModel basic add/load", "[voter]") {
     const QString connName = "test_voter_connection";

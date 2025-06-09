@@ -1,4 +1,6 @@
 #include "PartyModel.h"
+#include "Voter.h"
+#include "VoterModel.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -36,19 +38,19 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
     query.exec("CREATE TABLE IF NOT EXISTS parties ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                "name TEXT, "
-               "ideology TEXT, "
-               "popularity REAL)");
+               "ideology TEXT)");
+               //"popularity REAL)");
 
     if (seedDefaults)
         ensurePartiesPopulated(db);
 
-    query.exec("SELECT id, name, ideology, popularity FROM parties");
+    query.exec("SELECT id, name, ideology, FROM parties");
     while (query.next()) {
         m_parties.append(Party{
             query.value(0).toInt(),         // id
             query.value(1).toString(),      // name
             query.value(2).toString(),      // ideology
-            query.value(3).toDouble()       // popularity
+            //query.value(3).toDouble()       // popularity
         });
     }
     qDebug() << "[PartyModel] Connection name: " << m_connectionName;
@@ -64,7 +66,7 @@ int PartyModel::rowCount(const QModelIndex &) const {
 }
 
 int PartyModel::columnCount(const QModelIndex &) const {
-    return 3; // name, ideology, popularity
+    return 3; // name, ideology, //if 3 - popularity
 }
 
 QVariant PartyModel::data(const QModelIndex &index, int role) const {
@@ -76,7 +78,11 @@ QVariant PartyModel::data(const QModelIndex &index, int role) const {
         switch (index.column()) {
         case 0: return party.name;
         case 1: return party.ideology;
-        case 2: return QString::number(party.popularity, 'f', 2);
+        case 2:
+                if (voterModel) {
+                double pct = calculatePopularity(party.id);
+                return QString::number(pct, 'f', 2);
+            } else return "0.00";
         }
     } else if (role == Qt::UserRole) {
         return party.id;  // Expose party ID for linking
@@ -92,7 +98,7 @@ QVariant PartyModel::headerData(int section, Qt::Orientation orientation, int ro
     switch (section) {
     case 0: return "Name";
     case 1: return "Ideology";
-    case 2: return "Popularity";
+    case 2: return "Popularity %";
     }
     return {};
 }
@@ -105,11 +111,11 @@ void PartyModel::addParty(const Party &party) {
     }
 
     QSqlQuery query(db);
-    query.prepare("INSERT INTO parties (name, ideology, popularity) "
-                  "VALUES (:name, :ideology, :popularity)");
+    query.prepare("INSERT INTO parties (name, ideology) "
+                  "VALUES (:name, :ideology)");
     query.bindValue(":name", party.name);
     query.bindValue(":ideology", party.ideology);
-    query.bindValue(":popularity", party.popularity);
+    //query.bindValue(":popularity", party.popularity);
 
     if (!query.exec()) {
         qWarning() << "[PartyModel] Insert failed:" << query.lastError().text();
@@ -133,7 +139,7 @@ void PartyModel::reloadData() {
     }
 
     QSqlQuery query(db);
-    if (!query.exec("SELECT id, name, ideology, popularity FROM parties")) {
+    if (!query.exec("SELECT id, name, ideology FROM parties")) {
         qWarning() << "[PartyModel] reloadData failed:" << query.lastError().text();
         endResetModel();
         return;
@@ -144,7 +150,7 @@ void PartyModel::reloadData() {
             query.value(0).toInt(),                     // id
             query.value(1).toString(),                  // name
             query.value(2).toString(),                  // ideology
-            query.value(3).toDouble()                   // popularity
+            //query.value(3).toDouble()                   // popularity
         });
     }
 
@@ -161,11 +167,11 @@ bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
     if (countQuery.next() && countQuery.value(0).toInt() == 0) {
         QSqlQuery insert(db);
         QStringList insertStmts = {
-            "INSERT INTO parties (name, ideology, popularity) VALUES ('Unity Party', 'Centrist', 25.0)",
-            "INSERT INTO parties (name, ideology, popularity) VALUES ('Green Force', 'Environmentalism', 15.0)",
-            "INSERT INTO parties (name, ideology, popularity) VALUES ('Workers Union', 'Socialism', 20.0)",
-            "INSERT INTO parties (name, ideology, popularity) VALUES ('Liberty League', 'Liberalism', 22.0)",
-            "INSERT INTO parties (name, ideology, popularity) VALUES ('Tradition Front', 'Conservatism', 18.0)"
+            "INSERT INTO parties (name, ideology) VALUES ('Unity Party', 'Centrist')",
+            "INSERT INTO parties (name, ideology) VALUES ('Green Force', 'Environmentalism')",
+            "INSERT INTO parties (name, ideology) VALUES ('Workers Union', 'Socialism')",
+            "INSERT INTO parties (name, ideology) VALUES ('Liberty League', 'Liberalism')",
+            "INSERT INTO parties (name, ideology) VALUES ('Tradition Front', 'Conservatism')"
         };
 
         for (const QString& stmt : insertStmts) {
@@ -207,10 +213,10 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
     }
 
     QSqlQuery query(db);
-    query.prepare("UPDATE parties SET name = :name, ideology = :ideology, popularity = :popularity WHERE id = :id");
+    query.prepare("UPDATE parties SET name = :name, ideology = :ideology WHERE id = :id");
     query.bindValue(":name", updatedParty.name);
     query.bindValue(":ideology", updatedParty.ideology);
-    query.bindValue(":popularity", updatedParty.popularity);
+    //query.bindValue(":popularity", updatedParty.popularity);
     query.bindValue(":id", id);
 
     if (!query.exec()) {
@@ -225,4 +231,42 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
 Party PartyModel::getPartyAt(int row) const {
     if (row < 0 || row >= m_parties.size()) return {};
     return m_parties[row];
+}
+
+/*void PartyModel::recalculatePopularityFromVoters(const VoterModel* voterModel) {
+    if (!voterModel) return;
+
+    QMap<int, int> voteCounts;
+    int totalVotes = 0;
+
+    for (int i = 0; i < voterModel->rowCount(); ++i) {
+        QModelIndex index = voterModel->index(i, 0);
+        int partyId = voterModel->data(index, Qt::UserRole).toInt();
+        if (partyId != -1) {
+            voteCounts[partyId]++;
+            totalVotes++;
+        }
+    }
+
+    for (Party& party : m_parties) {
+        party.popularity = (totalVotes > 0)
+        ? (voteCounts.value(party.id, 0) * 100.0 / totalVotes)
+        : 0.0;
+    }
+
+    emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+    emit dataChangedExternally();
+}*/
+
+double PartyModel::calculatePopularity(int partyId) const {
+    if (!voterModel) return 0.0;
+    int total = voterModel->totalVoters();
+    if (total == 0) return 0.0;
+
+    QMap<int, int> map = voterModel->countVotersPerParty();
+    return (map.value(partyId, 0) * 100.0) / total;
+}
+
+void PartyModel::setVoterModel(VoterModel* model) {
+    voterModel = model;
 }

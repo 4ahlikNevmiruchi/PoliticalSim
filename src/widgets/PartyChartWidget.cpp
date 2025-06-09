@@ -1,4 +1,5 @@
 #include "PartyChartWidget.h"
+#include "PartyModel.h"
 #include <QtCharts/QChart>
 #include <QVBoxLayout>
 
@@ -10,6 +11,8 @@ PartyChartWidget::PartyChartWidget(PartyModel *model, QWidget *parent)
     updateChart();
 
     connect(partyModel, &PartyModel::dataChangedExternally, this, &PartyChartWidget::onDataChanged);
+    connect(partyModel, &PartyModel::popularityRecalculated, this, &PartyChartWidget::onDataChanged);
+
 }
 
 void PartyChartWidget::setupChart() {
@@ -32,9 +35,25 @@ void PartyChartWidget::onDataChanged() {
 
 void PartyChartWidget::updateChart() {
     pieSeries->clear();
-    const QVector<Party> &parties = partyModel->getAllParties();
+    const QVector<Party>& parties = partyModel->getAllParties();
+
+    double total = 0;
+    for (const Party &p : parties) {
+        double pct = partyModel->calculatePopularity(p.id);
+        if (pct > 0) {
+            total += pct;
+        }
+    }
+
+    if (total == 0) {
+        pieSeries->append("No Data", 1.0);
+        return;
+    }
 
     for (const Party &p : parties) {
-        pieSeries->append(p.name, p.popularity);
+        double pct = partyModel->calculatePopularity(p.id);
+        if (pct > 0) {
+            pieSeries->append(p.name, pct);
+        }
     }
 }

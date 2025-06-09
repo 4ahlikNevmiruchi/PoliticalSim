@@ -59,6 +59,9 @@
    </property>
   </widget>
   <widget class="QDoubleSpinBox" name="popularitySpin">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>40</x>

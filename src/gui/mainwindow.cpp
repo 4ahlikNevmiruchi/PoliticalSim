@@ -3,6 +3,7 @@
 #include "addpartydialog.h"
 #include "addvoterdialog.h"
 #include "widgets/PartyChartWidget.h"
+#include "models/PartyModel.h"
 
 #include <QSqlQuery>
 #include <QSqlError>
@@ -46,6 +47,22 @@ MainWindow::MainWindow(QWidget *parent)
     connect(voterModel, &VoterModel::voterUpdated, voterModel, &VoterModel::reloadData);
     connect(voterModel, &VoterModel::voterDeleted, voterModel, &VoterModel::reloadData);
 
+    // Link voter model to party model
+    partyModel->setVoterModel(voterModel);
+
+    // Recalculate chart on data change
+    connect(voterModel, &VoterModel::voterAdded, partyModel, [&] {
+        emit partyModel->dataChangedExternally();
+    });
+    connect(voterModel, &VoterModel::voterUpdated, partyModel, [&] {
+        emit partyModel->dataChangedExternally();
+    });
+    connect(voterModel, &VoterModel::voterDeleted, partyModel, [&] {
+        emit partyModel->dataChangedExternally();
+    });
+
+    connect(partyModel, &PartyModel::dataChangedExternally, partyChart, &PartyChartWidget::onDataChanged);
+
 
     //Tables allignment
     ui->partyTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -65,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
     QSqlDatabase db = QSqlDatabase::database("main_connection");
     partyModel->ensurePartiesPopulated(db);
     partyModel->reloadData();
+    //partyModel->recalculatePopularityFromVoters(voterModel);
 
     // Create map of name → id for assigning to voters
     QMap<QString, int> partyMap;
@@ -77,6 +95,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     voterModel->ensureVotersPopulated(db, partyMap);
     voterModel->reloadData();
+    //partyModel->recalculatePopularityFromVoters(voterModel);
 
     // Connect search bar to proxy
     connect(ui->voterSearchEdit, &QLineEdit::textChanged, this, [=](const QString &text) {
@@ -136,6 +155,7 @@ void MainWindow::setupButtonConnections() {
         if (dialog.exec() == QDialog::Accepted) {
             voterModel->addVoter(dialog.getVoter());
         }
+        //partyModel->recalculatePopularityFromVoters(voterModel);
     });
 
     connect(ui->editVoterButton, &QPushButton::clicked, this, [=]() {
@@ -150,6 +170,7 @@ void MainWindow::setupButtonConnections() {
         if (dialog.exec() == QDialog::Accepted) {
             voterModel->updateVoter(id, dialog.getVoter());
         }
+        //partyModel->recalculatePopularityFromVoters(voterModel);
     });
 
     connect(ui->deleteVoterButton, &QPushButton::clicked, this, [=]() {
@@ -158,6 +179,7 @@ void MainWindow::setupButtonConnections() {
         if (!index.isValid()) return;
         int id = voterModel->getVoterIdAt(index.row());
         voterModel->deleteVoterById(id);
+        //partyModel->recalculatePopularityFromVoters(voterModel);
     });
 
     connect(ui->resetButton, &QPushButton::clicked, this, &MainWindow::resetDatabase);
@@ -185,6 +207,7 @@ void MainWindow::resetDatabase() {
 
     partyModel->ensurePartiesPopulated(db);
     partyModel->reloadData();
+    //partyModel->recalculatePopularityFromVoters(voterModel);
 
     QMap<QString, int> partyMap;
     for (int i = 0; i < partyModel->rowCount(); ++i) {
@@ -196,6 +219,7 @@ void MainWindow::resetDatabase() {
 
     voterModel->ensureVotersPopulated(db, partyMap);
     voterModel->reloadData();
+    //partyModel->recalculatePopularityFromVoters(voterModel);
 }
 
 MainWindow::~MainWindow()

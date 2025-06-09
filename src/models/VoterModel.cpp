@@ -234,6 +234,7 @@ void VoterModel::deleteVoterById(int voterId) {
     query.bindValue(":id", voterId);
     if (!query.exec()) {
         qWarning() << "[VoterModel] Delete failed:" << query.lastError().text();
+        return;
     }
 
     emit voterDeleted();
@@ -265,4 +266,16 @@ void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
 Voter VoterModel::getVoterAt(int row) const {
     if (row < 0 || row >= m_voters.size()) return {};
     return m_voters[row];
+}
+
+QMap<int, int> VoterModel::countVotersPerParty() const {
+    QMap<int, int> counts;
+    for (const auto& voter : m_voters) {
+        counts[voter.partyId]++;
+    }
+    return counts;
+}
+
+int VoterModel::totalVoters() const {
+    return m_voters.size();
 }
