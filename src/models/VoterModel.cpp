@@ -299,6 +299,7 @@ void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
 
     QSqlQuery query(db);
     query.prepare("UPDATE voters SET name = :name, ideologyId = :ideologyId, ideology_x = :ix, ideology_y = :iy, party_id = :party_id WHERE id = :id");
+    query.bindValue(":name", updatedVoter.name);
     query.bindValue(":ideologyId", updatedVoter.ideologyId);
     query.bindValue(":ix", updatedVoter.ideologyX);
     query.bindValue(":iy", updatedVoter.ideologyY); // [MODIFIED]
