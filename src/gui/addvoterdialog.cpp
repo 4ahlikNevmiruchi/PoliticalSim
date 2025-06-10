@@ -13,16 +13,26 @@ AddVoterDialog::AddVoterDialog(QWidget *parent, PartyModel *partyModel)
     ui->setupUi(this);
 
     if (m_partyModel) {
-        for (int row = 0; row < m_partyModel->rowCount(); ++row) {
-            QModelIndex index = m_partyModel->index(row, 0);
-            QString partyName = m_partyModel->data(index, Qt::DisplayRole).toString();
-            int partyId = m_partyModel->data(index, Qt::UserRole).toInt();
-
-            ui->partyComboBox->addItem(partyName, partyId);
-        }
     }
-}
+    ui->partyComboBox->setVisible(false);
 
+    // Connect ideology coordinate spin boxes to update nearest ideology selection
+    connect(ui->ideologyXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this]() {
+        if (!m_ideologyModel) return;
+        int closestId = m_ideologyModel->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                                               ui->ideologyYSpinBox->value());
+        int idx = ui->ideologyComboBox->findData(closestId);
+        if (idx != -1) ui->ideologyComboBox->setCurrentIndex(idx);
+    });
+    connect(ui->ideologyYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this]() {
+        if (!m_ideologyModel) return;
+        int closestId = m_ideologyModel->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                                               ui->ideologyYSpinBox->value());
+        int idx = ui->ideologyComboBox->findData(closestId);
+        if (idx != -1) ui->ideologyComboBox->setCurrentIndex(idx);
+    });
+    ui->ideologyComboBox->setEnabled(false); //ideology selection is read-only
+}
 
 AddVoterDialog::~AddVoterDialog() {
     delete ui;
@@ -31,11 +41,39 @@ AddVoterDialog::~AddVoterDialog() {
 Voter AddVoterDialog::getVoter() const {
     Voter v;
     v.name = ui->nameEdit->text();
-    v.ideologyId = ui->ideologyComboBox->currentData().toInt();
-    v.ideology = ui->ideologyComboBox->currentText();  // for display
+    // Automatically determine closest ideology and party
+    if (m_ideologyModel) {
+        v.ideologyId = m_ideologyModel->findClosestIdeologyId(ideologyX(), ideologyY());
+        v.ideology = m_ideologyModel->getIdeologyNameById(v.ideologyId);
+    } else {
+        v.ideologyId = ui->ideologyComboBox->currentData().toInt();
+        v.ideology = ui->ideologyComboBox->currentText();
+    }
     v.ideologyX = ideologyX();
     v.ideologyY = ideologyY();
-    v.partyId = ui->partyComboBox->currentData().toInt();
+    if (m_partyModel) {
+        int closestPartyId = -1;
+        double minDistance = std::numeric_limits<double>::max();
+        for (const Party& p : m_partyModel->getAllParties()) {
+            double dx = p.ideologyX - v.ideologyX;
+            double dy = p.ideologyY - v.ideologyY;
+            double dist = dx * dx + dy * dy;
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestPartyId = p.id;
+            }
+        }
+        v.partyId = closestPartyId;
+        v.partyName = (closestPartyId != -1
+                           ? m_partyModel->getPartyAt(m_partyModel->getAllParties().indexOf(
+                                                          *std::find_if(m_partyModel->getAllParties().begin(), m_partyModel->getAllParties().end(),
+                                                                        [closestPartyId](const Party& p){ return p.id == closestPartyId; })))
+                                 .name
+                           : QString());  // find party name for completeness
+    } else {
+        v.partyId = -1;
+        v.partyName.clear();
+    }
     return v;
 }
 
@@ -45,16 +83,16 @@ void AddVoterDialog::setVoter(const Voter &voter) {
     setIdeologyX(voter.ideologyX);
     setIdeologyY(voter.ideologyY);
 
-    // Set ideology combo from id
+    // Set ideology combo from id (show stored ideology)
     int ideologyIndex = ui->ideologyComboBox->findData(voter.ideologyId);
     if (ideologyIndex != -1)
         ui->ideologyComboBox->setCurrentIndex(ideologyIndex);
 
-    // Set party combo
-    int partyIndex = ui->partyComboBox->findData(voter.partyId);
-    if (partyIndex != -1)
-        ui->partyComboBox->setCurrentIndex(partyIndex);
+    // int partyIndex = ui->partyComboBox->findData(voter.partyId);
+    // if (partyIndex != -1)
+    //     ui->partyComboBox->setCurrentIndex(partyIndex);
 }
+
 
 void AddVoterDialog::setPartyOptions(const QVector<Party>& parties) {
     partyList = parties;
@@ -90,4 +128,9 @@ void AddVoterDialog::setIdeologyModel(const IdeologyModel* model) {
     for (const Ideology& i : model->getIdeologies()) {
         ui->ideologyComboBox->addItem(i.name, i.id);
     }
+    // Select nearest ideology based on current coordinates
+    int curId = model->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                             ui->ideologyYSpinBox->value());
+    int idx = ui->ideologyComboBox->findData(curId);
+    if (idx != -1) ui->ideologyComboBox->setCurrentIndex(idx);
 }

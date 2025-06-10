@@ -9,23 +9,19 @@
 #include <QVariant>
 #include <QDebug>
 
-//  Custom constructor (used in real app or tests with connection name)
+//  Custom constructor
 PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seedDefaults, const QString &dbPath)
     : QAbstractTableModel(parent), m_connectionName(connectionName)
 {
-    Q_ASSERT(!connectionName.isEmpty());  //Prevent accidental usage
+    Q_ASSERT(!connectionName.isEmpty());  // Prevent accidental usage
 
     qDebug() << "[PartyModel] Connection name: " << m_connectionName;
 
-
     if (QSqlDatabase::contains(m_connectionName)) {
-        {
-            QSqlDatabase db = QSqlDatabase::database(m_connectionName, false);
-            if (db.isValid()) db.close();
-        }
+        QSqlDatabase db = QSqlDatabase::database(m_connectionName, false);
+        if (db.isValid()) db.close();
         QSqlDatabase::removeDatabase(m_connectionName);
     }
-
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", m_connectionName);
     db.setDatabaseName(dbPath);
@@ -37,28 +33,15 @@ PartyModel::PartyModel(const QString &connectionName, QObject *parent, bool seed
 
     QSqlQuery query(db);
     query.exec("CREATE TABLE IF NOT EXISTS parties ("
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "name TEXT, "
-                "ideology_id INTEGER,"
-                "ideology_x INTEGER, "
-                "ideology_y INTEGER,"
-                "FOREIGN KEY(ideology_id) REFERENCES ideologies(id) ON DELETE SET NULL)");
+               "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+               "name TEXT, "
+               "ideology_id INTEGER, "
+               "ideology_x INTEGER, "
+               "ideology_y INTEGER, "
+               "FOREIGN KEY(ideology_id) REFERENCES ideologies(id) ON DELETE SET NULL)");
 
     if (seedDefaults)
         ensurePartiesPopulated(db);
-
-    query.exec("SELECT id, name, ideology, ideology_x, ideology_y FROM parties");
-    while (query.next()) {
-        m_parties.append(Party{
-            query.value(0).toInt(),         // id
-            query.value(1).toString(),      // name
-            query.value(2).toInt(),      // ideology
-            query.value(3).toString(),
-            query.value(4).toInt()
-        });
-    }
-    qDebug() << "[PartyModel] Connection name: " << m_connectionName;
-    qDebug() << "[PartyModel] DB path: " << QSqlDatabase::database(m_connectionName).databaseName();
 }
 
 const QVector<Party>& PartyModel::getAllParties() const {
@@ -70,7 +53,7 @@ int PartyModel::rowCount(const QModelIndex &) const {
 }
 
 int PartyModel::columnCount(const QModelIndex &) const {
-    return 3; // name, ideology, //if 3 - popularity
+    return 3; // name, ideology, popularity
 }
 
 QVariant PartyModel::data(const QModelIndex &index, int role) const {
@@ -144,23 +127,21 @@ void PartyModel::reloadData() {
     }
 
     QSqlQuery query(db);
-    if (!query.exec("SELECT id, name, ideology, ideologyId, ideology_x, ideology_y FROM parties")) {
+    if (!query.exec("SELECT id, name, ideology_id, ideology_x, ideology_y FROM parties")) {
         qWarning() << "[PartyModel] reloadData failed:" << query.lastError().text();
         endResetModel();
         return;
     }
-
     while (query.next()) {
-        m_parties.append(Party{
-            query.value(0).toInt(),                     // id
-            query.value(1).toString(),                  // name
-            query.value(2).toInt(),                     // ideologyId
-            query.value(3).toString(),                  // ideology
-            query.value(3).toInt(),                     // ideologyX
-            query.value(5).toInt()                      // ideologyY
-        });
+        Party party;
+        party.id = query.value(0).toInt();
+        party.name = query.value(1).toString();
+        party.ideologyId = query.value(2).toInt();
+        party.ideology = (ideologyModel ? ideologyModel->getIdeologyNameById(party.ideologyId) : QString()); //get name from IdeologyModel
+        party.ideologyX = query.value(3).toInt();
+        party.ideologyY = query.value(4).toInt();
+        m_parties.append(party);
     }
-
     endResetModel();
 }
 

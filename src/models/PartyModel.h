@@ -18,6 +18,10 @@ struct Party {
     int ideologyX = 0;       //!< Economic axis
     int ideologyY = 0;       //!< Social axis
     //double popularity;
+
+    inline bool operator==(const Party& other) const {
+        return id == other.id;
+    }
 };
 /**
  * @brief Manages a table model of political parties, using an SQLite database.

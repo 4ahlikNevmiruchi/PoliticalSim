@@ -8,6 +8,23 @@
 AddPartyDialog::AddPartyDialog(QWidget *parent)
     : QDialog(parent), ui(new Ui::AddPartyDialog) {
     ui->setupUi(this);
+
+    // Connect ideology coordinate spin boxes to update nearest ideology selection
+    connect(ui->ideologyXSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this]() {
+        if (!m_ideologyModel) return;
+        int closestId = m_ideologyModel->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                                               ui->ideologyYSpinBox->value());
+        int idx = ui->ideologyComboBox->findData(closestId);
+        if (idx != -1) ui->ideologyComboBox->setCurrentIndex(idx);
+    });
+    connect(ui->ideologyYSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [this]() {
+        if (!m_ideologyModel) return;
+        int closestId = m_ideologyModel->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                                               ui->ideologyYSpinBox->value());
+        int idx = ui->ideologyComboBox->findData(closestId);
+        if (idx != -1) ui->ideologyComboBox->setCurrentIndex(idx);
+    });
+    ui->ideologyComboBox->setEnabled(false); //ideology selection is read-only
 }
 
 AddPartyDialog::~AddPartyDialog() {
@@ -15,9 +32,17 @@ AddPartyDialog::~AddPartyDialog() {
 }
 
 Party AddPartyDialog::getParty() const {
-    int ideologyId = ui->ideologyComboBox->currentData().toInt();
-    QString ideologyName = ui->ideologyComboBox->currentText();
-
+    // Determine closest ideology based on coordinates
+    int ideologyId = -1;
+    QString ideologyName;
+    if (m_ideologyModel) {
+        ideologyId = m_ideologyModel->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                                            ui->ideologyYSpinBox->value());
+        ideologyName = m_ideologyModel->getIdeologyNameById(ideologyId);
+    } else {
+        ideologyId = ui->ideologyComboBox->currentData().toInt();
+        ideologyName = ui->ideologyComboBox->currentText();
+    }
     return Party{
         m_partyId,
         ui->nameEdit->text(),
@@ -27,6 +52,7 @@ Party AddPartyDialog::getParty() const {
         ui->ideologyYSpinBox->value()
     };
 }
+
 
 
 void AddPartyDialog::setParty(const Party &party) {
@@ -71,4 +97,9 @@ void AddPartyDialog::setIdeologyModel(const IdeologyModel* model) {
     for (const Ideology& i : model->getIdeologies()) {
         ui->ideologyComboBox->addItem(i.name, i.id); // text, user data
     }
+    // Select nearest ideology for current coordinates
+    int curId = model->findClosestIdeologyId(ui->ideologyXSpinBox->value(),
+                                             ui->ideologyYSpinBox->value());
+    int idx = ui->ideologyComboBox->findData(curId);
+    if (idx != -1) ui->ideologyComboBox->setCurrentIndex(idx);
 }

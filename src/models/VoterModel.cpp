@@ -42,17 +42,24 @@ VoterModel::VoterModel(const QString &connectionName, QObject *parent, const QSt
                "FOREIGN KEY(party_id) REFERENCES parties(id) ON DELETE SET NULL,"
                "FOREIGN KEY(ideologyId) REFERENCES ideologies(id) ON DELETE SET NULL)");
 
-    query.exec("SELECT voters.id, voters.name, voters.ideology, voters.party_id, parties.name "
-               "FROM voters "
-               "LEFT JOIN parties ON voters.party_id = parties.id");
+    query.exec(R"(
+        SELECT v.id, v.name, i.name, v.ideologyId, v.ideology_x, v.ideology_y, v.party_id, p.name
+        FROM voters v
+        LEFT JOIN ideologies i ON v.ideologyId = i.id
+        LEFT JOIN parties p ON v.party_id = p.id
+    )");
 
     while (query.next()) {
         Voter v;
         v.id = query.value(0).toInt();
         v.name = query.value(1).toString();
         v.ideology = query.value(2).toString();
-        v.partyId = query.value(3).toInt();
-        v.partyName = query.value(4).toString();
+        v.ideologyId = query.value(3).toInt();
+        v.ideologyX = query.value(4).toInt();
+        v.ideologyY = query.value(5).toInt();
+        v.partyId = query.value(6).isNull() ? -1 : query.value(6).toInt();
+        v.partyName = query.value(7).toString();
+        m_voters.append(v);
     }
 }
 
@@ -65,13 +72,16 @@ int VoterModel::columnCount(const QModelIndex &) const {
 }
 
 QVariant VoterModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || role != Qt::DisplayRole) return {};
+    if (!index.isValid()) return {};
 
-    const Voter &voter = m_voters.at(index.row());
-    switch (index.column()) {
-    case 0: return voter.name;
-    case 1: return voter.ideology;
-    case 2: return voter.partyName.isEmpty() ? "N/A" : voter.partyName; // ✅ Party name display
+    const Voter& voter = m_voters.at(index.row());
+
+    if (role == Qt::DisplayRole) {
+        switch (index.column()) {
+        case 0: return voter.name;
+        case 1: return voter.ideology;                           // ideology name
+        case 2: return voter.partyName.isEmpty() ? "N/A" : voter.partyName;  // party name (or N/A)
+        }
     }
     return {};
 }
@@ -288,10 +298,15 @@ void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
     }
 
     QSqlQuery query(db);
-    query.prepare("UPDATE voters SET name = :name, ideology = :ideology, party_id = :party_id WHERE id = :id");
-    query.bindValue(":name", updatedVoter.name);
-    query.bindValue(":ideology", updatedVoter.ideology);
-    query.bindValue(":party_id", updatedVoter.partyId);
+    query.prepare("UPDATE voters SET name = :name, ideologyId = :ideologyId, ideology_x = :ix, ideology_y = :iy, party_id = :party_id WHERE id = :id");
+    query.bindValue(":ideologyId", updatedVoter.ideologyId);
+    query.bindValue(":ix", updatedVoter.ideologyX);
+    query.bindValue(":iy", updatedVoter.ideologyY); // [MODIFIED]
+    if (updatedVoter.partyId != -1) {
+        query.bindValue(":party_id", updatedVoter.partyId);
+    } else {
+        query.bindValue(":party_id", QVariant(QVariant::Int)); // NULL if no party
+    }
     query.bindValue(":id", id);
 
     if (!query.exec()) {
@@ -301,6 +316,7 @@ void VoterModel::updateVoter(int id, const Voter &updatedVoter) {
     emit voterUpdated();
     //reloadData();
 }
+
 
 Voter VoterModel::getVoterAt(int row) const {
     if (row < 0 || row >= m_voters.size()) return {};
