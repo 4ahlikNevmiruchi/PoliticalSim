@@ -127,9 +127,8 @@ public:
      */
     void setIdeologyModel(const IdeologyModel* model);
 
-public slots:
-    /** @brief Recompute each voter’s preferred party (called when parties change). */
-    void recalculatePreferredParties();
+    /** @brief Recompute each voter’s preferred party. */
+    void reassignAllVoterParties();
 
 private:
     QString m_connectionName;               ///< Database connection name.

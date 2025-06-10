@@ -163,7 +163,7 @@ private:
     QString m_dbPath;                     ///< File path of the SQLite database.
 
     const IdeologyModel* ideologyModel = nullptr;    ///< Pointer to the IdeologyModel (for ideology data).
-    const VoterModel* voterModel = nullptr;          ///< Pointer to the VoterModel (for voter data).
+    VoterModel* voterModel = nullptr;          ///< Pointer to the VoterModel (for voter data).
 };
 
 #endif // PARTYMODEL_H

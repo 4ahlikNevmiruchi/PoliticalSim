@@ -109,8 +109,10 @@ void PartyModel::addParty(const Party &party) {
         qWarning() << "[PartyModel] Insert failed:" << query.lastError().text();
         return;
     }
-
     emit partyAdded();
+    if (voterModel) {
+        voterModel->reassignAllVoterParties();
+    }
     emit dataChangedExternally();
     //reloadData();
 }
@@ -143,6 +145,7 @@ void PartyModel::reloadData() {
         m_parties.append(party);
     }
     endResetModel();
+    emit layoutChanged();
 }
 
 bool PartyModel::ensurePartiesPopulated(QSqlDatabase& db) {
@@ -187,8 +190,10 @@ void PartyModel::deletePartyById(int partyId) {
     if (!query.exec()) {
         qWarning() << "[PartyModel] Delete failed:" << query.lastError().text();
     }
-
     emit partyDeleted();
+    if (voterModel) {
+        voterModel->reassignAllVoterParties();
+    }
     emit dataChangedExternally();
     //reloadData();
 }
@@ -212,8 +217,10 @@ void PartyModel::updateParty(int id, const Party &updatedParty) {
     if (!query.exec()) {
         qWarning() << "[PartyModel] Update failed:" << query.lastError().text();
     }
-
     emit partyUpdated();
+    if (voterModel) {
+        voterModel->reassignAllVoterParties();
+    }
     emit dataChangedExternally();
     //reloadData();
 }
@@ -224,12 +231,10 @@ Party PartyModel::getPartyAt(int row) const {
 }
 
 double PartyModel::calculatePopularity(int partyId) const {
-    if (!voterModel) return 0.0;
     int total = voterModel->totalVoters();
     if (total == 0) return 0.0;
-
-    QMap<int, int> map = voterModel->countVotersPerParty();
-    return (map.value(partyId, 0) * 100.0) / total;
+    int countForThis = voterModel->countVotersPerParty().value(partyId, 0);
+    return (countForThis * 100.0) / total;
 }
 
 void PartyModel::setVoterModel(VoterModel* model) {
@@ -237,10 +242,6 @@ void PartyModel::setVoterModel(VoterModel* model) {
     connect(model, &VoterModel::voterAdded,    this, &PartyModel::recalculatePopularityFromVoters);
     connect(model, &VoterModel::voterUpdated,  this, &PartyModel::recalculatePopularityFromVoters);
     connect(model, &VoterModel::voterDeleted,  this, &PartyModel::recalculatePopularityFromVoters);
-
-    connect(this, &PartyModel::partyAdded,   model, &VoterModel::recalculatePreferredParties);
-    connect(this, &PartyModel::partyUpdated, model, &VoterModel::recalculatePreferredParties);
-    connect(this, &PartyModel::partyDeleted, model, &VoterModel::recalculatePreferredParties);
 }
 
 void PartyModel::recalculatePopularityFromVoters() {
@@ -255,4 +256,3 @@ void PartyModel::recalculatePopularityFromVoters() {
 void PartyModel::setIdeologyModel(const IdeologyModel* model) {
     ideologyModel = model;
 }
-

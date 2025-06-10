@@ -162,6 +162,7 @@ void VoterModel::reloadData() {
     }
 
     endResetModel();
+    emit layoutChanged();
     qDebug() << "[VoterModel] reloadData completed. Rows:" << m_voters.size();
 }
 
@@ -367,32 +368,22 @@ void VoterModel::setIdeologyModel(const IdeologyModel* model) {
     ideologyModel = model;
 }
 
-void VoterModel::recalculatePreferredParties() {
-    if (!partyModel) return;
-    bool updated = false;
+void VoterModel::reassignAllVoterParties() {
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    if (!db.isOpen()) return;
 
-    // Loop through in-memory list of voters
-    for (int row = 0; row < m_voters.size(); ++row) {
-        Voter &v = m_voters[row];
+    QSqlQuery updateQuery(db);
+    updateQuery.prepare("UPDATE voters SET party_id = :partyId WHERE id = :id");
+
+    for (Voter& v : m_voters) {
         int newPartyId = findClosestPartyId(v.ideologyX, v.ideologyY);
-        if (newPartyId != v.partyId) {
-            // Update in-memory
-            v.partyId   = newPartyId;
-            // Lookup the name
-            auto parties = partyModel->getAllParties();
-            auto it = std::find_if(parties.begin(), parties.end(),
-                                   [newPartyId](const Party& p){ return p.id == newPartyId; });
-            v.partyName = (it != parties.end() ? it->name : QString());
-            // Push to database
-            updateVoter(v.id, v);
-            updated = true;
-        }
+        v.partyId = newPartyId;
+
+        updateQuery.bindValue(":partyId", (newPartyId != -1 ? newPartyId : QVariant(QVariant::Int)));
+        updateQuery.bindValue(":id", v.id);
+        updateQuery.exec();  // silent fail tolerated
     }
 
-    if (updated) {
-        // Notify views
-        emit voterUpdated();
-        // Refresh the list
-        reloadData();
-    }
+    reloadData();       // refresh local model + UI
+    emit voterUpdated(); // trigger party popularity recalculation
 }
