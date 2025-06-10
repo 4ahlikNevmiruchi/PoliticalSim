@@ -237,6 +237,10 @@ void PartyModel::setVoterModel(VoterModel* model) {
     connect(model, &VoterModel::voterAdded,    this, &PartyModel::recalculatePopularityFromVoters);
     connect(model, &VoterModel::voterUpdated,  this, &PartyModel::recalculatePopularityFromVoters);
     connect(model, &VoterModel::voterDeleted,  this, &PartyModel::recalculatePopularityFromVoters);
+
+    connect(this, &PartyModel::partyAdded,   model, &VoterModel::recalculatePreferredParties);
+    connect(this, &PartyModel::partyUpdated, model, &VoterModel::recalculatePreferredParties);
+    connect(this, &PartyModel::partyDeleted, model, &VoterModel::recalculatePreferredParties);
 }
 
 void PartyModel::recalculatePopularityFromVoters() {

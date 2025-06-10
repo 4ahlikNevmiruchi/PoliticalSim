@@ -11,8 +11,7 @@ class IdeologyModel;
 /**
  * @brief Manages the list of voters (citizens) and their affiliations.
  *
- * @details VoterModel provides an interface to add voters, remove or update them,
- * and query voter data. It uses an SQLite table "voters" and links each voter to a party by ID.
+ * @details VoterModel provides an interface to add voters, remove or update them, and query voter data. It uses an SQLite table "voters" and links each voter to a party by ID.
  */
 class VoterModel : public QAbstractTableModel {
     Q_OBJECT
@@ -25,7 +24,6 @@ signals:
     /** @brief Emitted after a voter is removed from the database. */
     void voterDeleted();
 
-
 public:
     /**
      * @brief Constructor for VoterModel.
@@ -33,8 +31,7 @@ public:
      * @param parent Optional parent object.
      * @param dbPath SQLite database filename (default "politicalsim.sqlite").
      *
-     * Opens the SQLite database and ensures the voters table exists (with foreign key link to parties).
-     * Loads all existing voter records and prepares the model.
+     * Opens the SQLite database and ensures the voters table exists (with foreign key link to parties). Loads all existing voter records and prepares the model.
      */
     explicit VoterModel(const QString &connectionName, QObject *parent = nullptr, const QString &dbPath = "politicalsim.sqlite");
 
@@ -54,36 +51,92 @@ public:
      * Inserts the voter into the voters table. On success, emits `voterAdded` so the model can refresh.
      */
     void addVoter(const Voter& voter);
+
     /** @brief Reloads all voter data from the database into the model (e.g., after external changes). */
     void reloadData();
+
     /**
      * @brief Ensures default voters exist if none are present.
      * @param db An open QSqlDatabase connection.
      * @param partyNameToId Map of party names to their IDs (for assigning party_id to voters).
      * @returns True if the table was empty and default voters were inserted, false if no action needed.
      *
-     * Checks if the voters table is empty. If so, populates it with a set of sample voters
-     * associated with each default party. Uses the provided map to link voter party names to IDs.
+     * Checks if the voters table is empty. If so, populates it with a set of sample voters associated with each default party. Uses the provided map to link voter party names to IDs.
      */
     bool ensureVotersPopulated(QSqlDatabase& db, const QMap<QString, int>& partyNameToId);
-    int getVoterIdAt(int row) const;
-    void deleteVoterById(int voterId);
+
+    /**
+     * @brief Updates an existing voter's information.
+     * @param id The ID of the voter to update.
+     * @param updatedVoter A Voter struct with the new details for the voter.
+     *
+     * Saves the changes to the database for the given voter ID and updates the model. Emits `voterUpdated` on success.
+     */
     void updateVoter(int id, const Voter &updatedVoter);
-    QMap<int, int> countVotersPerParty() const;
-    int totalVoters() const;
+
+    /**
+     * @brief Removes a voter from the database and model by ID.
+     * @param voterId The ID of the voter to remove.
+     *
+     * Deletes the voter record from the database and updates the model. Emits `voterDeleted` on success.
+     */
+    void deleteVoterById(int voterId);
+
+    /**
+     * @brief Retrieves the Voter at the specified row.
+     * @param row The index of the row.
+     * @return A copy of the Voter at that row.
+     */
     Voter getVoterAt(int row) const;
+
+    /**
+     * @brief Returns the ID of the voter at the given row.
+     * @param row The row index in the model.
+     * @return The voter ID at that row.
+     */
+    int getVoterIdAt(int row) const;
+
+    /**
+     * @brief Returns the total number of voters.
+     */
+    int totalVoters() const;
+
+    /**
+     * @brief Counts how many voters are affiliated with each party.
+     * @return A map of party ID to the count of voters in that party.
+     */
+    QMap<int, int> countVotersPerParty() const;
+
+    /**
+     * @brief Finds the ID of the party whose ideology is closest to the given coordinates.
+     * @param x The ideology X-coordinate.
+     * @param y The ideology Y-coordinate.
+     * @return The ID of the nearest party, or -1 if no parties are available.
+     */
     int findClosestPartyId(int x, int y) const;
 
+    /**
+     * @brief Sets the PartyModel used by this VoterModel.
+     * @param model Pointer to the PartyModel providing party data.
+     */
     void setPartyModel(const PartyModel* model);
+
+    /**
+     * @brief Sets the IdeologyModel used by this VoterModel.
+     * @param model Pointer to the IdeologyModel providing ideology data.
+     */
     void setIdeologyModel(const IdeologyModel* model);
 
+public slots:
+    /** @brief Recompute each voter’s preferred party (called when parties change). */
+    void recalculatePreferredParties();
 
 private:
-    QString m_connectionName;
-    QVector<Voter> m_voters;
+    QString m_connectionName;               ///< Database connection name.
+    QVector<Voter> m_voters;                ///< List of Voter records currently loaded.
 
-    const PartyModel* partyModel = nullptr;
-    const IdeologyModel* ideologyModel = nullptr;
+    const PartyModel* partyModel = nullptr;             ///< Pointer to the associated PartyModel (for party data).
+    const IdeologyModel* ideologyModel = nullptr;       ///< Pointer to the associated IdeologyModel (for ideology data).
 };
 
 #endif // VOTERMODEL_H

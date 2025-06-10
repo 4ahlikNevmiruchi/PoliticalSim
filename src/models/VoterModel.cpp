@@ -366,3 +366,33 @@ void VoterModel::setPartyModel(const PartyModel* model) {
 void VoterModel::setIdeologyModel(const IdeologyModel* model) {
     ideologyModel = model;
 }
+
+void VoterModel::recalculatePreferredParties() {
+    if (!partyModel) return;
+    bool updated = false;
+
+    // Loop through in-memory list of voters
+    for (int row = 0; row < m_voters.size(); ++row) {
+        Voter &v = m_voters[row];
+        int newPartyId = findClosestPartyId(v.ideologyX, v.ideologyY);
+        if (newPartyId != v.partyId) {
+            // Update in-memory
+            v.partyId   = newPartyId;
+            // Lookup the name
+            auto parties = partyModel->getAllParties();
+            auto it = std::find_if(parties.begin(), parties.end(),
+                                   [newPartyId](const Party& p){ return p.id == newPartyId; });
+            v.partyName = (it != parties.end() ? it->name : QString());
+            // Push to database
+            updateVoter(v.id, v);
+            updated = true;
+        }
+    }
+
+    if (updated) {
+        // Notify views
+        emit voterUpdated();
+        // Refresh the list
+        reloadData();
+    }
+}
