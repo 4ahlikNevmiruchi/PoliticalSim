@@ -106,7 +106,7 @@ Overall, the current state of the project is a working demo of the core function
 ### Observer Pattern
 The **Observer pattern** is extensively used in PoliticalSim through Qt's signal-slot mechanism. Model classes (e.g., `PartyModel`, `VoterModel`) act as subjects that emit signals when their data changes,
 while other components (views, charts, or other models) act as observers by connecting to these signals. For example, `PartyModel` defines signals like `partyAdded`, `partyUpdated`, and `partyDeleted` to notify when parties are
-modified:contentReference[oaicite:0]{index=0}. The `PartyModel` also observes `VoterModel` – in its `setVoterModel` method it connects voter-related signals to its own slot for recalculating popularity:contentReference[oaicite:1]{index=1}.
+modified. The `PartyModel` also observes `VoterModel` – in its `setVoterModel` method it connects voter-related signals to its own slot for recalculating popularity.
 This way, when a voter is added or edited, the `VoterModel` emits an event and the `PartyModel` automatically updates derived data (party popularity) and notifies the UI.
 
 ```cpp
@@ -115,23 +115,21 @@ connect(model, &VoterModel::voterAdded,    this, &PartyModel::recalculatePopular
 connect(model, &VoterModel::voterUpdated,  this, &PartyModel::recalculatePopularityFromVoters);
 connect(model, &VoterModel::voterDeleted,  this, &PartyModel::recalculatePopularityFromVoters);
 ```
-:contentReference[oaicite:2]{index=2}
 
 Here, `VoterModel` is the subject that emits `voterAdded/Updated/Deleted`, and `PartyModel::recalculatePopularityFromVoters` is the observer action.
-Similarly, the GUI charts connect to model signals (e.g. `PartyModel::dataChangedExternally`, `VoterModel::voterAdded`) to refresh displays whenever data changes:contentReference[oaicite:3]{index=3}.
+Similarly, the GUI charts connect to model signals (e.g. `PartyModel::dataChangedExternally`, `VoterModel::voterAdded`) to refresh displays whenever data changes.
 This event-driven design decouples the models from the views, following the Observer pattern.
 
 ### Proxy Pattern
 PoliticalSim uses Qt’s `QSortFilterProxyModel` as an implementation of the **Proxy pattern** for the voter list filtering. The `VoterModel` provides all voter data, and a `QSortFilterProxyModel` instance (`voterProxyModel`)stands in front of it to filter search results without altering the original model.
 The proxy model has the same interface as the real model (it’s a subclass of `QAbstractItemModel`) and forwards data requests to the `VoterModel` but can modify the results (e.g., filtering by name).
-In the code, the proxy is set up by assigning the `VoterModel` as its source and then using the proxy in the view:contentReference[oaicite:4]{index=4}:
+In the code, the proxy is set up by assigning the `VoterModel` as its source and then using the proxy in the view:
 
 ```cpp
 voterProxyModel = new QSortFilterProxyModel(this);
 voterProxyModel->setSourceModel(voterModel);
 ui->voterTableView->setModel(voterProxyModel);  // View uses proxy instead of direct model
 ```
-:contentReference[oaicite:5]{index=5}
 
 Here, `voterProxyModel` controls access to the underlying `voterModel`, functioning as a stand-in that filters or sorts data before it reaches the UI.
 
@@ -139,7 +137,7 @@ Here, `voterProxyModel` controls access to the underlying `voterModel`, function
 The application’s model classes serve as adapters between the database and the UI, which corresponds to the **Adapter pattern**. They convert the raw data storage interface (SQLite database and in-memory records) into the interface that the Qt view expects (`QAbstractTableModel`).
 For example, `PartyModel` loads party records from SQLite into a `QVector<Party>` and exposes them via the standard model methods (`rowCount`, `data`, etc.).
 In doing so, it transforms low-level database fields into higher-level, user-friendly values. Notably, it uses an `IdeologyModel` to map ideology IDs to human-readable ideology names when providing data.
-During data loading, `PartyModel` queries the `IdeologyModel` for the name of each party’s ideology and stores it, so that its `data()` can return the ideology name string instead of a numeric ID:contentReference[oaicite:6]{index=6}.
+During data loading, `PartyModel` queries the `IdeologyModel` for the name of each party’s ideology and stores it, so that its `data()` can return the ideology name string instead of a numeric ID.
 Likewise, `PartyModel::data` combines information from multiple sources (party name, ideology name, and a calculated popularity percentage) into the format needed by the view:
 
 ```cpp
@@ -157,14 +155,13 @@ if (role == Qt::DisplayRole) {
     return party.id;  // Provide raw ID for internal use
 }
 ```
-:contentReference[oaicite:7]{index=7}
 
-Here the model adapts internal data into view-friendly outputs: for example, it returns `party.ideology` (a name string) for display, which was originally looked up via `IdeologyModel` (adapting an ID to a name):contentReference[oaicite:8]{index=8}.
+Here the model adapts internal data into view-friendly outputs: for example, it returns `party.ideology` (a name string) for display, which was originally looked up via `IdeologyModel` (adapting an ID to a name).
 By implementing Qt’s model interface, `PartyModel` and `VoterModel` let the UI treat database-backed data as ordinary table models. This decouples the UI from the database schema, fulfilling the role of an Adapter.
 
 ## Mediator Pattern
 The `MainWindow` class plays a coordinating role that resembles the **Mediator pattern**. Rather than having UI widgets and models communicate directly, `MainWindow` centralizes their interactions.
-For example, when the user clicks the "Add Party" button, `MainWindow` opens an `AddPartyDialog`, supplies it with the `IdeologyModel` for lookups, and then—if the user confirms—passes the new party data to the `PartyModel` to create a party record:contentReference[oaicite:9]{index=9}.
+For example, when the user clicks the "Add Party" button, `MainWindow` opens an `AddPartyDialog`, supplies it with the `IdeologyModel` for lookups, and then—if the user confirms—passes the new party data to the `PartyModel` to create a party record.
 The dialog itself doesn’t modify the `PartyModel` directly; instead, `MainWindow` serves as an intermediary between the dialog and the model:
 
 ```cpp
@@ -176,7 +173,6 @@ connect(ui->addPartyButton, &QPushButton::clicked, this, [=]() {
     }
 });
 ```
-:contentReference[oaicite:10]{index=10}
 
 Similarly, `MainWindow` mediates other actions (editing or deleting parties/voters, updating charts on selection changes, etc.), ensuring that UI components (dialogs, tables, charts) and data models interact only through this central hub.
 This approach aligns with the Mediator pattern by reducing direct coupling among the various parts of the application.
