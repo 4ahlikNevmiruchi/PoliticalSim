@@ -1,15 +1,33 @@
 @startuml
-package GUI {
-  [MainWindow]
-  [AddPartyDialog]
-  [AddVoterDialog]
+package "PoliticalSim" {
+    [MainWindow] --> [PartyModel]
+    [MainWindow] --> [VoterModel]
+    [MainWindow] --> [IdeologyModel]
+    [MainWindow] --> [ChartView]
+    [MainWindow] --> [AddPartyDialog]
+    [MainWindow] --> [AddVoterDialog]
 }
-package Model {
-  [PartyModel]
-  [VoterModel]
-  [IdeologyModel]
-}
-[MainWindow] --> [PartyModel]
-[MainWindow] --> [VoterModel]
+
+[IdeologyModel] --> [SQLite DB]
+
+[PartyModel] --> [SQLite DB]
 [PartyModel] --> [IdeologyModel]
+[PartyModel] --> [VoterModel]
+
+[VoterModel] --> [SQLite DB]
+[VoterModel] --> [PartyModel]
+[VoterModel] --> [IdeologyModel]
+
+[AddPartyDialog] --> [IdeologyModel]
+[AddVoterDialog] --> [PartyModel]
+[AddVoterDialog] --> [IdeologyModel]
+
+[ChartView] --> [PartyModel]
+[ChartView] --> [VoterModel]
+
+database "SQLite DB" as DB
+
+[PartyModel] --> DB
+[VoterModel] --> DB
+[IdeologyModel] --> DB
 @enduml

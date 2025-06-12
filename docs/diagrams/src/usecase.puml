@@ -1,11 +1,29 @@
 @startuml
+left to right direction
 actor User
-actor Admin
 
 rectangle PoliticalSim {
-  User --> (Vote in Simulation)
-  User --> (View Ideology Map)
-  Admin --> (Add Party)
-  Admin --> (Edit Voter)
+    usecase "Add Party" as UC1
+    usecase "Edit Party" as UC2
+    usecase "Delete Party" as UC3
+    usecase "View Party Stats" as UC4
+    usecase "Add Voter" as UC5
+    usecase "Edit Voter" as UC6
+    usecase "Delete Voter" as UC7
+    usecase "Assign Voter to Party" as UC8
+    usecase "Visualize Ideologies" as UC9
+    usecase "Run Simulation" as UC10
 }
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC10
+
 @enduml

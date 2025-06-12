@@ -1,0 +1,17 @@
+@startuml
+[*] --> New
+
+state New {
+  [*] --> Created
+}
+
+Created --> Assigned : Closest party found
+Assigned --> Reassigned : Party model changed
+Reassigned --> Assigned : Reassignment complete
+Assigned --> Edited : User edits voter data
+Edited --> Reassigned : Requires reassignment
+Edited --> Deleted : User deletes voter
+Assigned --> Deleted : User deletes voter
+
+Deleted --> [*]
+@enduml

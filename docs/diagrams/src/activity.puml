@@ -1,0 +1,21 @@
+@startuml
+start
+
+:User clicks "Add Party" button;
+:MainWindow opens AddPartyDialog;
+:AddPartyDialog initialized with IdeologyModel;
+:AddPartyDialog collects user input;
+
+if (dialog.exec() == Accepted?) then (yes)
+  :MainWindow retrieves Party object;
+  :PartyModel::addParty(party);
+  :Insert party into database;
+  :Emit partyAdded signal;
+  :Recalculate voter-party assignments;
+  :Emit dataChangedExternally;
+else (no)
+  :Cancel operation;
+endif
+
+stop
+@enduml

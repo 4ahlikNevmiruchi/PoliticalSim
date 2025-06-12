@@ -1,9 +1,25 @@
 @startuml
-node UserPC {
-  component "PoliticalSim.exe" {
-    artifact "mainwindow"
-    artifact "models"
-    artifact "sqlite DB"
-  }
+node "User PC" {
+    artifact "PoliticalSim.exe" {
+        [MainWindow]
+        [PartyModel]
+        [VoterModel]
+        [IdeologyModel]
+        [AddPartyDialog]
+        [AddVoterDialog]
+        [ChartView]
+    }
+
+    database "politicalsim.sqlite" as SQLiteDB
 }
+
+[PartyModel] --> SQLiteDB
+[VoterModel] --> SQLiteDB
+[IdeologyModel] --> SQLiteDB
+[MainWindow] --> [PartyModel]
+[MainWindow] --> [VoterModel]
+[MainWindow] --> [IdeologyModel]
+[MainWindow] --> [ChartView]
+[MainWindow] --> [AddPartyDialog]
+[MainWindow] --> [AddVoterDialog]
 @enduml

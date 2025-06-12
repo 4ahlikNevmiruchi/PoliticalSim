@@ -1,0 +1,27 @@
+@startuml
+actor User
+participant MainWindow
+participant PartyModel
+participant VoterModel
+participant IdeologyModel
+participant UI
+
+User -> MainWindow : Clicks "Add/Edit Party"
+MainWindow -> AddPartyDialog : Show dialog
+AddPartyDialog -> IdeologyModel : Load ideology list
+User -> AddPartyDialog : Inputs party data
+AddPartyDialog -> MainWindow : getParty()
+MainWindow -> PartyModel : addParty(party)
+
+PartyModel -> Database : Insert or update party record
+PartyModel -> VoterModel : reassignAllVoterParties()
+
+VoterModel -> VoterModel : for each voter
+VoterModel -> PartyModel : findClosestPartyId(x, y)
+PartyModel -> VoterModel : return closest ID
+VoterModel -> Database : Update voter's party
+
+VoterModel -> PartyModel : emit voterUpdated()
+PartyModel -> UI : emit dataChangedExternally()
+
+@enduml

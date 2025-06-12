@@ -1,8 +1,0 @@
-@startuml
-[*] --> Idle
-Idle --> Running : startSimulation()
-Running --> Paused : pause()
-Paused --> Running : resume()
-Running --> Finished : complete()
-Finished --> Idle : reset()
-@enduml

@@ -1,0 +1,62 @@
+@startuml
+object party1 {
+  id = 1
+  name = "Progressive Party"
+  ideologyId = 2
+  ideology = "Centrist"
+  ideologyX = 0
+  ideologyY = 0
+}
+
+object party2 {
+  id = 2
+  name = "Liberty League"
+  ideologyId = 1
+  ideology = "Liberal"
+  ideologyX = 50
+  ideologyY = -30
+}
+
+object voter1 {
+  id = 1
+  name = "Alice"
+  ideologyId = 1
+  ideology = "Liberal"
+  ideologyX = 48
+  ideologyY = -28
+  partyId = 2
+}
+
+object voter2 {
+  id = 2
+  name = "Bob"
+  ideologyId = 2
+  ideology = "Centrist"
+  ideologyX = 2
+  ideologyY = 1
+  partyId = 1
+}
+
+object ideology1 {
+  id = 1
+  name = "Liberal"
+  ideologyX = 48
+  ideologyY = -28
+}
+
+object ideology2 {
+  id = 2
+  name = "Centrist"
+  ideologyX = 0
+  ideologyY = 0
+}
+
+party1 --> ideology2
+party2 --> ideology1
+voter1 --> ideology1
+voter2 --> ideology2
+voter1 --> party2
+voter2 --> party1
+
+
+@enduml
