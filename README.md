@@ -177,6 +177,49 @@ connect(ui->addPartyButton, &QPushButton::clicked, this, [=]() {
 Similarly, `MainWindow` mediates other actions (editing or deleting parties/voters, updating charts on selection changes, etc.), ensuring that UI components (dialogs, tables, charts) and data models interact only through this central hub.
 This approach aligns with the Mediator pattern by reducing direct coupling among the various parts of the application.
 
+## Facade Pattern
+
+The model classes (`PartyModel`, `VoterModel`, etc.) act as a simplified interface to complex operations involving the database and related data.
+Instead of the UI or other components having to manage SQL queries, data conversions, and updates across multiple tables, the models provide high-level methods that internally handle those details.
+For instance, adding a new party is done via `PartyModel::addParty()`, which hides all the SQL insert logic and related updates behind a single call:
+
+```cpp
+// Adding a party via PartyModel (facade to DB and related updates)
+void PartyModel::addParty(const Party &party) {
+    QSqlDatabase db = QSqlDatabase::database(m_connectionName);
+    if (!db.isOpen()) { /* ... */ return; }
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO parties (...) VALUES (:name, :ideology_id, :ix, :iy)");
+    query.bindValue(":name", party.name);
+    query.bindValue(":ideology_id", party.ideologyId);
+    query.bindValue(":ix", party.ideologyX);
+    query.bindValue(":iy", party.ideologyY);
+    if (!query.exec()) { qWarning() << "[PartyModel] Insert failed:" << query.lastError().text(); return; }
+    emit partyAdded();
+    if (voterModel) { voterModel->reassignAllVoterParties(); }
+    emit dataChangedExternally();
+}
+```
+Here, the UI simply calls `partyModel->addParty(...)` and the model facades the details: it executes the SQL insert, emits signals (which observers pick up), and even triggers a voter reassignment to update all related data.
+Similarly, when loading data, `PartyModel` pulls together information from multiple sources (the party table and the `IdeologyModel` for names) and presents it in one unified form.
+In the snippet below, `PartyModel::reloadData()` queries the DB and uses the `IdeologyModel` to translate ideology IDs to names, all hidden behind the model’s interface:
+
+```cpp
+// PartyModel reloads data, combining DB records with ideology names (facade to DB + IdeologyModel)
+while (query.next()) {
+    Party party;
+    party.id = query.value(0).toInt();
+    party.name = query.value(1).toString();
+    party.ideologyId = query.value(2).toInt();
+    party.ideology = (ideologyModel ? ideologyModel->getIdeologyNameById(party.ideologyId) : QString());
+    party.ideologyX = query.value(3).toInt();
+    party.ideologyY = query.value(4).toInt();
+    m_parties.append(party);
+}
+:contentReference[oaicite:4]{index=4}
+```
+By providing a single point of interaction for party data (add, update, delete, load, etc.), `PartyModel` and its peers function like facades – they shield the rest of the application from the complexities of SQL, data mapping, and cross-model coordination.
+
 ---
 
 ## Development Notes
