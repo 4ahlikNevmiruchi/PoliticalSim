@@ -1,0 +1,9 @@
+@startuml
+node UserPC {
+  component "PoliticalSim.exe" {
+    artifact "mainwindow"
+    artifact "models"
+    artifact "sqlite DB"
+  }
+}
+@enduml

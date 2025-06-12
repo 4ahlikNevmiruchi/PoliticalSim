@@ -1,0 +1,11 @@
+@startuml
+actor User
+actor Admin
+
+rectangle PoliticalSim {
+  User --> (Vote in Simulation)
+  User --> (View Ideology Map)
+  Admin --> (Add Party)
+  Admin --> (Edit Voter)
+}
+@enduml

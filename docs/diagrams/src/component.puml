@@ -1,0 +1,15 @@
+@startuml
+package GUI {
+  [MainWindow]
+  [AddPartyDialog]
+  [AddVoterDialog]
+}
+package Model {
+  [PartyModel]
+  [VoterModel]
+  [IdeologyModel]
+}
+[MainWindow] --> [PartyModel]
+[MainWindow] --> [VoterModel]
+[PartyModel] --> [IdeologyModel]
+@enduml
